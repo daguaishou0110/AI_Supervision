@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>数据与计算 · 深基课</title>
+  <meta name="description" content="深基课第二章：NumPy 数组、shape、运算与矩阵乘法，Matplotlib 画 loss 曲线。面向刚学完 Python 底子的本科生。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-chapter">
+  <a class="skip" href="#chapter-main">跳到正文</a>
+
+  <header class="top">
+    <a class="brand-mark" href="index.html">深基课</a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="index.html#learn">学习清单</a>
+      <a href="#toc">本章目录</a>
+      <a href="#ch-pass">过关标准</a>
+    </nav>
+  </header>
+
+  <main id="chapter-main">
+    <header class="chapter-hero">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">深基课</a> / <a href="index.html#learn">先学什么</a> / 数据与计算</p>
+        <p class="section-kicker">第二章 · 02 · 数据与计算</p>
+        <h1>数据与计算</h1>
+        <p class="chapter-lead">深度学习里的数据，几乎都是「一堆数字排成的表」。这一章用 <strong>NumPy</strong> 学会造数组、看 shape、做运算和矩阵乘法；再用 <strong>Matplotlib</strong> 画出 loss 曲线。默认你已完成第一章（会跑脚本、会 venv 与 pip）。</p>
+        <p class="chapter-goal"><strong>过关目标：</strong>能自己造假数据、算平均与矩阵乘，并画出一张随轮次下降的 loss 折线图。</p>
+      </div>
+    </header>
+
+    <div class="chapter-layout wrap">
+      <nav class="toc" id="toc" aria-label="章节目录">
+        <p class="toc-title">本章目录</p>
+        <ol>
+          <li><a href="#ch-0">怎么学 · 前置</a></li>
+          <li><a href="#ch-1">为什么要 NumPy</a></li>
+          <li><a href="#ch-2">安装 NumPy 与 Matplotlib</a></li>
+          <li><a href="#ch-3">创建数组</a></li>
+          <li><a href="#ch-4">shape 与索引</a></li>
+          <li><a href="#ch-5">数组运算</a></li>
+          <li><a href="#ch-6">统计：mean / sum</a></li>
+          <li><a href="#ch-7">矩阵乘法</a></li>
+          <li><a href="#ch-8">Matplotlib 画 loss 曲线</a></li>
+          <li><a href="#ch-9">综合练习</a></li>
+          <li><a href="#ch-pass">过关自检</a></li>
+          <li><a href="#ch-ai">用 AI 学这一章</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+
+        <section id="ch-0" class="chapter-block reveal">
+          <h2>0. 怎么学 · 前置</h2>
+          <p>请确认第一章已过关：能 <code>python 某文件.py</code>、会激活 venv、会 <code>pip install</code>。若还不会，先回 <a href="python-basics.html">Python 底子</a>。</p>
+          <ol>
+            <li>仍然用练习文件夹（如 <code>D:\shenji-python</code>），建议新建子文件夹 <code>ch02</code> 专门放本章代码。</li>
+            <li>每节：看 → 敲 → 运行。画图时窗口弹出属正常，关掉窗口再继续。</li>
+            <li>数学只保留「形状对不对、能不能乘」的直觉，不证明公式。</li>
+          </ol>
+          <div class="callout">
+            <p><strong>建议时间：</strong>约 6–10 小时。安装通了再往下；shape 搞不清时不要急着学矩阵乘。</p>
+          </div>
+        </section>
+
+        <section id="ch-1" class="chapter-block reveal">
+          <h2>1. 为什么要 NumPy</h2>
+          <p>Python 列表能装数字，但做大批计算又慢又麻烦。NumPy 的 <strong>ndarray（数组）</strong> 专为数值计算设计：一次对整表做加减乘，后面 PyTorch 张量的感觉也和它很像。</p>
+          <pre><code># 列表：要自己循环
+xs = [1, 2, 3]
+ys = [x * 2 for x in xs]
+
+# NumPy：整表一次算完
+import numpy as np
+a = np.array([1, 2, 3])
+b = a * 2
+print(b)  # [2 4 6]</code></pre>
+          <div class="callout">
+            <p><strong>和深度学习的关系：</strong>图像、文本向量、权重矩阵，底层都是多维数字表。先在 NumPy 里看懂 shape，到 PyTorch 会轻松很多。</p>
+          </div>
+        </section>
+
+        <section id="ch-2" class="chapter-block reveal">
+          <h2>2. 安装 NumPy 与 Matplotlib</h2>
+          <p>在已激活的虚拟环境里安装（终端前应有 <code>(.venv)</code>）：</p>
+          <pre><code>cd D:\shenji-python
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+python -m pip install numpy matplotlib</code></pre>
+          <p>验证：</p>
+          <pre><code>python -c "import numpy as np; import matplotlib; print(np.__version__, matplotlib.__version__)"</code></pre>
+          <p>能打印两个版本号即成功。</p>
+          <div class="callout callout-warn">
+            <p><strong>翻车：</strong>没激活 venv 就 pip → 包装错位置，脚本里 <code>import numpy</code> 失败。先看有没有 <code>(.venv)</code>。</p>
+          </div>
+
+          <div class="progress-bar" data-progress-for="np-install" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="np-install">完成 0 / 2 步</p>
+          <div class="check-panel" data-check-group="np-install">
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pip" />
+              <span>已在 venv 中安装 numpy、matplotlib</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-import" />
+              <span>import 成功并打印出版本号</span>
+            </label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="np-install">清空安装勾选</button></p>
+        </section>
+
+        <section id="ch-3" class="chapter-block reveal">
+          <h2>3. 创建数组</h2>
+          <p>约定：几乎所有教程都写 <code>import numpy as np</code>，后面用 <code>np.</code> 调用。</p>
+          <pre><code>import numpy as np
+
+a = np.array([0.9, 0.7, 0.5])          # 从列表创建
+z = np.zeros(5)                         # 5 个 0
+o = np.ones((2, 3))                     # 2 行 3 列全 1
+r = np.arange(0, 1.0, 0.2)              # 0, 0.2, ..., 0.8
+print(a)
+print(z)
+print(o)
+print(r)</code></pre>
+          <ul>
+            <li><code>np.array([...])</code>：最常用，把列表变成数组</li>
+            <li><code>zeros</code> / <code>ones</code>：造占位数据、造假样本时常用</li>
+            <li><code>arange</code>：均匀间距的一串数（注意终点通常取不到）</li>
+          </ul>
+          <p class="tip"><strong>动手：</strong>新建 <code>ch02/make_array.py</code>，创建长度为 10 的全 0 数组，再创建一个 <code>[1,3,5,7]</code> 的数组并打印。</p>
+        </section>
+
+        <section id="ch-4" class="chapter-block reveal">
+          <h2>4. shape 与索引（本章核心）</h2>
+          <p><strong>shape</strong> 描述数组长什么样：有几维、每一维多长。深度学习里报错一大半是 shape 对不上。</p>
+          <pre><code>import numpy as np
+
+v = np.array([0.9, 0.7, 0.5, 0.4, 0.3])
+print(v.shape)        # (5,)  → 一维，长度 5
+
+m = np.array([
+    [1, 2, 3],
+    [4, 5, 6],
+])
+print(m.shape)        # (2, 3) → 2 行 3 列
+print(m[0, 1])        # 第 0 行第 1 列 → 2
+print(m[:, 0])        # 第 0 列所有行 → [1 4]
+print(m[1, :])        # 第 1 行 → [4 5 6]</code></pre>
+          <figure class="figure">
+            <img src="assets/numpy-shape.png" alt="一维 shape (5,) 与二维 shape (2,3) 示意图" width="1600" height="900" loading="lazy" />
+            <figcaption>先养成习惯：打印数组后立刻看 <code>.shape</code>。行在前、列在后：<code>(2, 3)</code> = 2 行 3 列。</figcaption>
+          </figure>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>下标从 0 开始；<code>m[2, 0]</code> 在只有 2 行时会越界。拿不准就先 <code>print(arr.shape)</code>。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>造一个 shape 为 <code>(3, 4)</code> 的全 1 矩阵，打印第 2 行（下标 1）和第 0 列。</p>
+        </section>
+
+        <section id="ch-5" class="chapter-block reveal">
+          <h2>5. 数组运算</h2>
+          <pre><code>import numpy as np
+
+a = np.array([1.0, 2.0, 3.0])
+b = np.array([10.0, 20.0, 30.0])
+
+print(a + b)     # 对应位置相加
+print(a * 2)     # 每个元素乘 2
+print(a ** 2)    # 每个元素平方
+print(a + 1)     # 每个元素加 1（简单广播）</code></pre>
+          <p>对应位置运算要求 shape 兼容。初学先保证「两个一维一样长」或「数组和单个数」。</p>
+          <pre><code>x = np.array([1, 2, 3])
+y = np.array([1, 2])
+# print(x + y)  # 会报错：shape 对不上</code></pre>
+          <p class="tip"><strong>动手：</strong>有一组假 loss <code>[0.9, 0.7, 0.5]</code>，用数组算出「每个 loss 减 0.1」并打印。</p>
+        </section>
+
+        <section id="ch-6" class="chapter-block reveal">
+          <h2>6. 统计：mean / sum</h2>
+          <pre><code>import numpy as np
+
+losses = np.array([0.9, 0.7, 0.55, 0.48])
+print(losses.mean())   # 平均
+print(losses.sum())    # 求和
+print(losses.max(), losses.min())
+
+m = np.array([[1, 2, 3],
+              [4, 5, 6]], dtype=float)
+print(m.mean())          # 全体平均
+print(m.mean(axis=0))    # 按列平均 → 长度 3
+print(m.mean(axis=1))    # 按行平均 → 长度 2</code></pre>
+          <div class="callout">
+            <p><strong>axis 直觉：</strong><code>axis=0</code> 常理解为「沿着行的方向压缩」（跨行），得到每列的统计；<code>axis=1</code> 跨列，得到每行的统计。记不住就打印 shape 对比。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>用 2×3 的分数矩阵，分别算全体平均、每行平均。</p>
+        </section>
+
+        <section id="ch-7" class="chapter-block reveal">
+          <h2>7. 矩阵乘法（为神经网络铺路）</h2>
+          <p>神经网络里一层的核心操作，常可以想成：输入向量 × 权重矩阵。NumPy 用 <code>@</code> 或 <code>np.dot</code>。</p>
+          <pre><code>import numpy as np
+
+# 规则：左边列数 == 右边行数
+# (2, 3) @ (3, 4) → (2, 4)
+
+A = np.array([[1, 2, 3],
+              [4, 5, 6]], dtype=float)      # (2, 3)
+B = np.array([[1, 0],
+              [0, 1],
+              [1, 1]], dtype=float)         # (3, 2)
+C = A @ B
+print(A.shape, B.shape, C.shape)
+print(C)</code></pre>
+          <ul>
+            <li>先看两边 shape，再相乘</li>
+            <li><code>*</code> 是对应元素相乘；<code>@</code> 才是矩阵乘。别混。</li>
+          </ul>
+          <div class="callout callout-warn">
+            <p><strong>报错 ValueError: matmul</strong> → shape 对不上。打印两边 <code>.shape</code>，检查「前一个的最后一维」是否等于「后一个的倒数第二维」。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>造 <code>x</code> shape <code>(1, 4)</code>，<code>W</code> shape <code>(4, 2)</code>，算 <code>x @ W</code>，确认结果 shape 是 <code>(1, 2)</code>。</p>
+        </section>
+
+        <section id="ch-8" class="chapter-block reveal">
+          <h2>8. Matplotlib 画 loss 曲线</h2>
+          <p>训练时最常看的图：横轴是 epoch（轮次），纵轴是 loss（损失）。下降通常表示模型在拟合训练数据（下一章再讲含义）。</p>
+          <figure class="figure">
+            <img src="assets/loss-curve.png" alt="loss 随 epoch 下降的折线示意" width="1600" height="900" loading="lazy" />
+            <figcaption>示意：横轴轮次，纵轴损失。你的真实曲线不一定这么平滑，但画图方法一样。</figcaption>
+          </figure>
+          <pre><code>import matplotlib.pyplot as plt
+
+epochs = [1, 2, 3, 4, 5, 6, 7, 8]
+losses = [0.95, 0.80, 0.68, 0.60, 0.54, 0.50, 0.47, 0.45]
+
+plt.figure()
+plt.plot(epochs, losses, marker="o")
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.title("training loss")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("loss_curve.png", dpi=150)  # 保存到当前文件夹
+plt.show()                               # 弹窗显示；保存后也可先注释掉</code></pre>
+          <ul>
+            <li><code>plot</code>：折线；<code>xlabel</code> / <code>ylabel</code>：轴名称</li>
+            <li><code>savefig</code>：存成图片，交作业或写报告方便</li>
+            <li>若弹窗卡住，可只 <code>savefig</code>、暂时不用 <code>show</code></li>
+          </ul>
+          <div class="callout callout-warn">
+            <p><strong>中文乱码：</strong>标题若写中文可能方块字。入门阶段轴标签先用英文 <code>epoch</code> / <code>loss</code> 最省事。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>改一组自己的假 loss（总体呈下降），保存为 <code>my_loss.png</code>。</p>
+        </section>
+
+        <section id="ch-9" class="chapter-block reveal">
+          <h2>9. 综合练习（分步勾选）</h2>
+          <p>在 <code>ch02/mini_lab.py</code> 中完成。每步跑通再勾选。</p>
+
+          <div class="progress-bar" data-progress-for="np-practice" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="np-practice">完成 0 / 4 步</p>
+          <div class="check-panel" data-check-group="np-practice">
+            <label class="check-item">
+              <input type="checkbox" data-key="np-p-a" />
+              <span><strong>A</strong>：用 <code>np.random.rand(5, 3)</code> 造假数据，打印 shape（应为 <code>(5, 3)</code>）</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-p-b" />
+              <span><strong>B</strong>：对第 0 维求 mean，得到长度 3 的向量并打印</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-p-c" />
+              <span><strong>C</strong>：造 <code>W</code> 为 <code>(3, 2)</code>，用假数据 <code>@ W</code>，确认结果 shape 为 <code>(5, 2)</code></span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-p-d" />
+              <span><strong>D</strong>：手写一串下降的假 loss，画图并 <code>savefig("ch02_loss.png")</code></span>
+            </label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="np-practice">清空本练习勾选</button></p>
+
+          <p>参考骨架（先自己写，卡住再对照）：</p>
+          <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+X = np.random.rand(5, 3)
+print("X", X.shape)
+print("mean axis0", X.mean(axis=0), X.mean(axis=0).shape)
+
+W = np.random.randn(3, 2)
+Y = X @ W
+print("Y", Y.shape)
+
+epochs = np.arange(1, 9)
+losses = np.array([0.9, 0.75, 0.62, 0.55, 0.5, 0.46, 0.43, 0.41])
+plt.figure()
+plt.plot(epochs, losses, marker="o")
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.title("fake training loss")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("ch02_loss.png", dpi=150)
+print("saved ch02_loss.png")</code></pre>
+        </section>
+
+        <section id="ch-pass" class="chapter-block reveal">
+          <h2>过关自检</h2>
+          <p>勾选保存在本机浏览器。全部勾完再进下一章「机器学习直觉」。</p>
+          <div class="progress-bar" data-progress-for="np-pass" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="np-pass">完成 0 / 8 项</p>
+          <div class="check-panel" data-check-group="np-pass">
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-1" />
+              <span>能在 venv 中安装并 import numpy、matplotlib</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-2" />
+              <span>会用 <code>np.array</code> / <code>zeros</code> / <code>ones</code> 造数组</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-3" />
+              <span>看到数组会先看 <code>.shape</code>，能解释 <code>(2,3)</code> 含义</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-4" />
+              <span>会做对应元素加减乘，以及 <code>mean</code> / <code>sum</code></span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-5" />
+              <span>会用 <code>@</code> 做矩阵乘，并能根据 shape 预判结果形状</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-6" />
+              <span>能画出 epoch–loss 折线并保存 png</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-7" />
+              <span>综合练习 A–D 独立跑通</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="np-pass-8" />
+              <span>能向别人讲清：<code>*</code> 与 <code>@</code> 的区别</span>
+            </label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="np-pass">清空过关勾选</button></p>
+        </section>
+
+        <section id="ch-ai" class="chapter-block reveal">
+          <h2>用 AI 学这一章</h2>
+          <p>Cursor / Codex / ChatGPT 都可以。shape 类问题把<strong>完整报错 + 两边数组的 shape 打印结果</strong>一起贴出。</p>
+          <pre><code>我在学 NumPy / Matplotlib（深基课第二章）。
+环境：Windows，已激活 venv，numpy 版本 ____。
+请不要直接给完整作业。
+
+代码：
+（粘贴）
+
+我打印的 shape：
+（粘贴）
+
+完整报错：
+（粘贴）
+
+请：1）判断是 shape 问题还是别的；2）只改必要的几行；3）用一句话解释为什么这样 shape 才合法。</code></pre>
+        </section>
+
+        <nav class="chapter-pager" aria-label="章节翻页">
+          <a class="pager-link" href="python-basics.html">← 上一章：Python 底子</a>
+          <a class="pager-link" href="ml-intuition.html">下一章：机器学习直觉 →</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <p><span class="brand-inline">深基课</span> · 数据与计算</p>
+      <p class="muted"><a href="index.html">回到首页</a></p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

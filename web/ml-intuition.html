@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>机器学习直觉（细讲）· 深基课</title>
+  <meta name="description" content="深基课第三章细讲：模型在学什么、特征与标签、训练验证测试、过拟合、指标、loss、梯度学习率、batch、超参数，含 NumPy 实验。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-chapter">
+  <a class="skip" href="#chapter-main">跳到正文</a>
+
+  <header class="top">
+    <a class="brand-mark" href="index.html">深基课</a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="index.html#learn">学习清单</a>
+      <a href="#toc">本章目录</a>
+      <a href="#ch-pass">过关标准</a>
+    </nav>
+  </header>
+
+  <main id="chapter-main">
+    <header class="chapter-hero">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">深基课</a> / <a href="index.html#learn">先学什么</a> / 机器学习直觉</p>
+        <p class="section-kicker">第三章 · 03 · 细讲扩写</p>
+        <h1>机器学习直觉</h1>
+        <p class="chapter-lead">面向<strong>没系统上过机器学习课</strong>的本科生。少推公式，多画面、多对照、多踩坑。你要带走的不是名词表，而是能向同学讲清：数据怎么拆、模型在调什么、为什么看测试集、loss 曲线坏了可能意味着什么。</p>
+        <p class="chapter-goal"><strong>过关目标：</strong>① 用自己的话解释「模型在学什么」；② 分清 train/val/test、过拟合、参数/超参数；③ 跑通拟合直线实验，并对比不同学习率。</p>
+      </div>
+    </header>
+
+    <div class="chapter-layout wrap">
+      <nav class="toc" id="toc" aria-label="章节目录">
+        <p class="toc-title">本章目录</p>
+        <ol>
+          <li><a href="#ch-0">怎么学 · 前置</a></li>
+          <li><a href="#ch-1">先看一张总流程图</a></li>
+          <li><a href="#ch-2">模型在学什么</a></li>
+          <li><a href="#ch-3">任务类型：回归与分类</a></li>
+          <li><a href="#ch-4">特征 X 与标签 y</a></li>
+          <li><a href="#ch-5">训练 / 验证 / 测试</a></li>
+          <li><a href="#ch-6">怎么切分数据</a></li>
+          <li><a href="#ch-7">过拟合与欠拟合</a></li>
+          <li><a href="#ch-8">指标：准确率等</a></li>
+          <li><a href="#ch-9">损失 loss 细讲</a></li>
+          <li><a href="#ch-10">梯度、学习率、更新</a></li>
+          <li><a href="#ch-11">epoch 与 batch</a></li>
+          <li><a href="#ch-12">参数与超参数</a></li>
+          <li><a href="#ch-13">读 loss 曲线</a></li>
+          <li><a href="#ch-14">迷你实验 A：拟合直线</a></li>
+          <li><a href="#ch-15">迷你实验 B：改学习率</a></li>
+          <li><a href="#ch-pass">过关自检</a></li>
+          <li><a href="#ch-wrong">常见错误说法</a></li>
+          <li><a href="#ch-ai">用 AI 学这一章</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+
+        <section id="ch-0" class="chapter-block reveal">
+          <h2>0. 怎么学 · 前置</h2>
+          <p>请先完成 <a href="python-basics.html">Python 底子</a> 与 <a href="data-computing.html">数据与计算</a>。本章代码用到：能跑脚本、<code>numpy</code>、<code>matplotlib</code>。</p>
+          <ol>
+            <li><strong>先建立画面，再记英文词。</strong> 例如先理解「考试题不能提前练」，再记 test set。</li>
+            <li>每节结束做「一句话复述」。说不利索 = 还没过关。</li>
+            <li>实验部分必须自己改数字跑，只看不做等于没学。</li>
+          </ol>
+          <div class="callout">
+            <p><strong>建议时间：</strong>概念阅读 3–5 小时 + 实验 2–4 小时。可拆成 3–4 天。</p>
+          </div>
+          <div class="callout callout-warn">
+            <p><strong>本章不讲：</strong>反向传播手推、SVM 推导、概率论大全。那些留到以后需要时再补。现在目标是「上课/看论文代码时名词不懵」。</p>
+          </div>
+        </section>
+
+        <section id="ch-1" class="chapter-block reveal">
+          <h2>1. 先看一张总流程图</h2>
+          <p>整章内容可以串成一条流水线。先有全局，再看零件。</p>
+          <figure class="figure">
+            <img src="assets/ml-pipeline.png" alt="监督学习流程：数据到训练验证测试再到预测" width="1600" height="900" loading="lazy" />
+            <figcaption>监督学习入门主路径。后面每一节都在解释图上的某一段。</figcaption>
+          </figure>
+          <ol>
+            <li>拿到带答案的数据 → 拆成特征与标签</li>
+            <li>切成训练 /（验证）/ 测试</li>
+            <li>在训练集上反复：预测 → 算 loss → 用梯度更新参数</li>
+            <li>用验证集帮你选超参数、决定何时停</li>
+            <li>最后用测试集估一次「真实水平」</li>
+            <li>部署后：只给新的 X，模型给出预测（没有标准答案可对时，就要靠线下业务指标）</li>
+          </ol>
+        </section>
+
+        <section id="ch-2" class="chapter-block reveal">
+          <h2>2. 模型在学什么</h2>
+          <div class="callout">
+            <p><strong>一句话：</strong>模型在学一个「从输入到输出」的可调规则；训练 = 根据数据把规则里的数字旋钮拧到更合适。</p>
+          </div>
+          <h3>2.1 三个角色</h3>
+          <ul>
+            <li><strong>输入（input / 特征）</strong>：模型看见的东西——图片像素、表格里的列、文本变成的数字向量……</li>
+            <li><strong>输出（output / 预测）</strong>：模型给出的回答——类别、数值、概率……</li>
+            <li><strong>参数（parameters / 权重）</strong>：规则内部的旋钮。训练前往往是随机或默认值；训练后变成「更会做这类题」。</li>
+          </ul>
+          <h3>2.2 和传统编程差在哪</h3>
+          <ul>
+            <li><strong>传统编程：</strong>人写死 <code>if</code> 规则。例如「面积 &gt; 90 且地铁近 → 贵」。</li>
+            <li><strong>机器学习：</strong>人提供大量例子；机器自己找规律。规则可能复杂到人写不出来，但可以用数据「拟合」出来。</li>
+          </ul>
+          <h3>2.3 生活类比</h3>
+          <p>学骑车：不是背「第 3 秒把手转 12 度」，而是在一次次摔倒里把身体参数调对。机器学习也是：用错误（loss）当反馈，一点点改参数。</p>
+          <div class="callout callout-warn">
+            <p><strong>别说成：</strong>「模型把训练集背下来了所以会了。」背下来叫死记，遇到新题会崩——那是过拟合。我们要的是<strong>泛化</strong>：新数据也大致正确。</p>
+          </div>
+          <p class="tip"><strong>一句话复述：</strong>「训练不是背答案，是调参数，让没见过的题也尽量答对。」</p>
+        </section>
+
+        <section id="ch-3" class="chapter-block reveal">
+          <h2>3. 任务类型：回归与分类</h2>
+          <p>入门先分清两大类（名字会在代码、论文、作业里反复出现）：</p>
+          <ul>
+            <li><strong>回归 regression：</strong>预测连续数值。房价、温度、年龄估计。</li>
+            <li><strong>分类 classification：</strong>预测类别。垃圾邮件/正常邮件、猫/狗、病情有/无。</li>
+          </ul>
+          <p>还有排序、生成、检测等，先按下。选什么样的 loss、指标，常和任务类型绑定。</p>
+          <pre><code># 回归：输出一个数
+y_reg = 128.5          # 万元房价
+
+# 分类：输出类别（或各类概率）
+y_cls = "dog"          # 或数字编号 1
+# 概率形式：[0.1, 0.9] 表示猫 0.1 / 狗 0.9</code></pre>
+          <p class="tip"><strong>动手口述：</strong>举一个你专业里的回归例子、一个分类例子。</p>
+        </section>
+
+        <section id="ch-4" class="chapter-block reveal">
+          <h2>4. 特征 X 与标签 y</h2>
+          <p>监督学习的一条样本，通常长这样：</p>
+          <ul>
+            <li><strong>X（features）</strong>：用来预测的信息</li>
+            <li><strong>y（label）</strong>：正确答案 / 监督信号</li>
+          </ul>
+          <h3>4.1 表格例子</h3>
+          <pre><code># 每一行是一个样本
+# 特征：面积、房龄；标签：房价
+# X shape 直觉：(样本数, 特征数)
+X = [
+  [50, 10],
+  [60, 5],
+  [80, 2],
+]
+y = [120, 140, 200]</code></pre>
+          <h3>4.2 图像例子（直觉）</h3>
+          <p>一张 RGB 图可以想成很大的数字表。标签可能是「猫」「狗」。深度学习会自动从像素里抽出有用特征，但「有 X、有 y、要学映射」这件事不变。</p>
+          <h3>4.3 标签从哪来</h3>
+          <p>人工标注、业务系统记录、实验测量……标签错了，模型会学错。入门项目先用干净公开数据；自己标数据时要意识到：垃圾进，垃圾出。</p>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>把「学号、姓名」之类不当特征塞进 X，或把未来才知道的信息泄漏进特征（数据泄漏）。训练分会虚高，上线翻车。</p>
+          </div>
+        </section>
+
+        <section id="ch-5" class="chapter-block reveal">
+          <h2>5. 训练 / 验证 / 测试</h2>
+          <p>如果同一批题既拿来练习又拿来当期末考，分数会骗人。机器学习一样。</p>
+          <ul>
+            <li><strong>训练集 training set：</strong>真正用来更新参数的数据。</li>
+            <li><strong>验证集 validation set：</strong>训练过程中帮忙选超参数、做早停、比模型；不直接拿来算梯度更新（常规设定下）。</li>
+            <li><strong>测试集 test set：</strong>最后估一次泛化表现；不要天天盯着它调参，否则它也慢慢变成「练过的题」。</li>
+          </ul>
+          <figure class="figure">
+            <img src="assets/ml-split-overfit.png" alt="训练拟合、测试泛化与过拟合示意" width="1600" height="900" loading="lazy" />
+            <figcaption>中图才是关键：没见过的点行不行。右图弯太狠，常是过拟合信号。</figcaption>
+          </figure>
+          <div class="callout">
+            <p><strong>小项目现实做法：</strong>数据很少时，先做 train/test 两分；课设或认真调参再加 val。K 折交叉验证是进阶工具，先知道名字即可。</p>
+          </div>
+          <p class="tip"><strong>一句话复述：</strong>「训练集用来学，验证集用来选，测试集用来最终验收。」</p>
+        </section>
+
+        <section id="ch-6" class="chapter-block reveal">
+          <h2>6. 怎么切分数据（操作直觉）</h2>
+          <ul>
+            <li>常见比例：train:test = 8:2 或 7:3；若有 val，可 7:1.5:1.5 或 8:1:1（示意）。</li>
+            <li><strong>随机打乱再切</strong>，避免数据原本按类别/时间排好导致某一折全是同一类。</li>
+            <li><strong>固定随机种子</strong>（如 <code>np.random.seed(0)</code>），方便复现实验。</li>
+            <li>分类任务尽量<strong>分层抽样</strong>（各集合里类别比例差不多）。</li>
+            <li>时间序列常按时间切，不能随机打乱未来泄漏到过去——有这类数据时问老师。</li>
+          </ul>
+          <pre><code>import numpy as np
+
+np.random.seed(0)
+idx = np.arange(100)
+np.random.shuffle(idx)
+train_idx = idx[:80]
+test_idx = idx[80:]
+print(len(train_idx), len(test_idx))</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>先用全部数据算均值做标准化，再切分——测试信息泄漏进预处理。更稳妥：只在训练集上 fit 预处理，再应用到 val/test。</p>
+          </div>
+        </section>
+
+        <section id="ch-7" class="chapter-block reveal">
+          <h2>7. 过拟合与欠拟合</h2>
+          <h3>7.1 定义（人话）</h3>
+          <ul>
+            <li><strong>欠拟合 underfitting：</strong>太简单或练不够，训练集都表现差。</li>
+            <li><strong>过拟合 overfitting：</strong>把训练集（含噪声）记太死，换测试集就差。典型：train 很好，test 明显变差。</li>
+            <li><strong>刚好：</strong>train 与 test 都还行，差距不大（具体多少算「大」看任务）。</li>
+          </ul>
+          <h3>7.2 你怎么察觉</h3>
+          <ul>
+            <li>画 train loss 与 val loss：val 长期变差而 train 仍在降 → 过拟合嫌疑</li>
+            <li>准确率：train 99%，test 60% → 很可疑</li>
+          </ul>
+          <h3>7.3 常见应对（先记菜单）</h3>
+          <ul>
+            <li>更多/更干净数据；数据增强（图像翻转等）</li>
+            <li>更简单模型；正则；Dropout</li>
+            <li>早停（val 变差就停）</li>
+            <li>别把测试集当调参玩具</li>
+          </ul>
+          <p>下一章写 PyTorch 时会碰到其中几项；现在先能<strong>看图诊断</strong>。</p>
+        </section>
+
+        <section id="ch-8" class="chapter-block reveal">
+          <h2>8. 指标：准确率等（和 loss 分工）</h2>
+          <ul>
+            <li><strong>loss：</strong>训练时的指南针，必须可导（对常用优化方式而言），方便算梯度。</li>
+            <li><strong>指标 metric：</strong>给人看的成绩，如准确率、精确率/召回率、RMSE……不一定直接拿来反传。</li>
+          </ul>
+          <pre><code># 准确率直觉：对的条数 / 总条数
+y_true = np.array([0, 1, 1, 0])
+y_pred = np.array([0, 1, 0, 0])
+acc = (y_true == y_pred).mean()
+print(acc)  # 0.75</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>类别极不均衡时：</strong>99% 都是「正常」，模型全猜正常也能准确率很高——这指标会骗人。后面会遇到 F1 等，先知道有这个坑。</p>
+          </div>
+        </section>
+
+        <section id="ch-9" class="chapter-block reveal">
+          <h2>9. 损失 loss 细讲</h2>
+          <p>loss 把「错得有多离谱」收成一个数。训练目标：让它变小。</p>
+          <h3>9.1 回归常用：MSE</h3>
+          <pre><code>pred = np.array([10.0, 8.0])
+true = np.array([12.0, 8.5])
+mse = np.mean((pred - true) ** 2)
+print(mse)</code></pre>
+          <p>差得越远，平方后惩罚越大。</p>
+          <h3>9.2 分类常用：交叉熵（直觉）</h3>
+          <p>模型输出各类概率。若真标签是「狗」，却把很大概率分给「猫」，惩罚就重。细节公式下一章用框架时再碰到；现在记住：<strong>概率越自信地错，loss 往往越大</strong>。</p>
+          <h3>9.3 loss 与指标不同步</h3>
+          <p>有时 loss 降了，准确率暂时不动——正常，可能在边界附近微调。两边一起看更稳。</p>
+          <p class="tip"><strong>复述：</strong>「loss 指导训练；准确率报告给人。两者相关，但不永远同步。」</p>
+        </section>
+
+        <section id="ch-10" class="chapter-block reveal">
+          <h2>10. 梯度、学习率、参数更新</h2>
+          <p>把 loss 看成山谷，参数是位置。<strong>梯度</strong>指出升得最快的方向；更新时常<strong>反方向走</strong>一小步，让 loss 下降。</p>
+          <figure class="figure">
+            <img src="assets/ml-loss-gradient.png" alt="损失山谷与梯度下山示意" width="1600" height="900" loading="lazy" />
+            <figcaption>学习率 = 步子大小。太大易蹦飞，太小走不动。</figcaption>
+          </figure>
+          <h3>10.1 更新公式（只需认形状）</h3>
+          <pre><code># 伪代码
+# param = param - lr * grad
+w = w - lr * dw
+b = b - lr * db</code></pre>
+          <ul>
+            <li><code>grad / dw</code>：这个参数对 loss 的「敏感方向」</li>
+            <li><code>lr</code>：步长。常用从 <code>1e-3</code> 试起，再看曲线调</li>
+          </ul>
+          <h3>10.2 学习率太大 / 太小会怎样</h3>
+          <ul>
+            <li>太大：loss 震荡、变 NaN、直接爆炸</li>
+            <li>太小：降得极慢，像没训练</li>
+            <li>合适：整体有下降趋势（可有小震荡）</li>
+          </ul>
+          <div class="callout">
+            <p><strong>优化器：</strong>SGD、Adam 等是「怎么根据梯度迈步」的策略。入门先会用默认 Adam/SGD；原理以后再挖。</p>
+          </div>
+        </section>
+
+        <section id="ch-11" class="chapter-block reveal">
+          <h2>11. epoch 与 batch</h2>
+          <ul>
+            <li><strong>epoch：</strong>把整个训练集完整过一轮（大致含义）。</li>
+            <li><strong>batch（小批量）：</strong>每次只用一小撮样本算梯度并更新。省内存，也带来一点噪声，有时反而有助泛化。</li>
+            <li><strong>batch size：</strong>每撮多少条。太大可能显存不够；太小更新很吵、更慢。</li>
+            <li><strong>iteration / step：</strong>更新一次参数算一步。一个 epoch 里通常有多个 step。</li>
+          </ul>
+          <pre><code># 直觉：1000 条训练样本，batch_size=100
+# 则大约每个 epoch 有 10 次参数更新</code></pre>
+          <p class="tip"><strong>下一章对照：</strong>训练循环里 for epoch，里面再 for batch，就是这个结构。</p>
+        </section>
+
+        <section id="ch-12" class="chapter-block reveal">
+          <h2>12. 参数与超参数</h2>
+          <ul>
+            <li><strong>参数：</strong>训练中自动更新，如权重 w、偏置 b、卷积核……</li>
+            <li><strong>超参数：</strong>训练前你定：学习率、batch size、epoch 数、网络层数、是否 Dropout……</li>
+          </ul>
+          <p>调参流程直觉：改超参数 → 重新训练 → 看 val 指标 / 曲线 → 再改。测试集留到最后。</p>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>在测试集上反复试超参数，等于变相把测试集变成验证集，最终报告会偏乐观。</p>
+          </div>
+        </section>
+
+        <section id="ch-13" class="chapter-block reveal">
+          <h2>13. 怎么读 loss 曲线</h2>
+          <ul>
+            <li><strong>平滑下降后趋稳：</strong>常见健康形状</li>
+            <li><strong>一直不降：</strong>lr 太小、学不动、数据/标签问题、实现 bug</li>
+            <li><strong>剧烈震荡：</strong>lr 偏大、batch 太小等</li>
+            <li><strong>变 NaN：</strong>数值爆炸，先降 lr、查数据是否有异常值</li>
+            <li><strong>train 降、val 升：</strong>过拟合信号，考虑早停或加正则</li>
+          </ul>
+          <p>第二章你会画单条 loss；第四章起尽量同时画 train 与 val。</p>
+        </section>
+
+        <section id="ch-14" class="chapter-block reveal">
+          <h2>14. 迷你实验 A：拟合直线</h2>
+          <p>不用深度学习框架，只用 NumPy 体会「预测 → loss → 梯度 → 更新」。新建 <code>ch03/fit_line.py</code>。</p>
+          <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+X = np.linspace(0, 1, 40)
+y = 2 * X + 1 + 0.1 * np.random.randn(len(X))
+
+w, b = 0.0, 0.0
+lr = 0.1
+losses = []
+
+for epoch in range(80):
+    pred = w * X + b
+    err = pred - y
+    loss = np.mean(err ** 2)
+    losses.append(loss)
+
+    dw = 2 * np.mean(err * X)
+    db = 2 * np.mean(err)
+    w -= lr * dw
+    b -= lr * db
+
+print(f"learned w={w:.3f}, b={b:.3f}")
+
+plt.figure()
+plt.plot(losses)
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.title("loss curve")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("ch03_loss.png", dpi=150)
+print("saved ch03_loss.png")</code></pre>
+          <p>理想情况：学到的 w、b 接近 2 和 1；loss 曲线总体下降。</p>
+
+          <div class="progress-bar" data-progress-for="ml-lab-a" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="ml-lab-a">完成 0 / 3 步</p>
+          <div class="check-panel" data-check-group="ml-lab-a">
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-a1" />
+              <span>跑通并打印接近 2 / 1 的 w、b</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-a2" />
+              <span>保存下降的 <code>ch03_loss.png</code></span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-a3" />
+              <span>能指着代码说出：哪行算预测、哪行算 loss、哪行更新参数</span>
+            </label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="ml-lab-a">清空 A 勾选</button></p>
+        </section>
+
+        <section id="ch-15" class="chapter-block reveal">
+          <h2>15. 迷你实验 B：改学习率对比</h2>
+          <p>把上面的 <code>lr</code> 分别改成 <code>0.01</code>、<code>0.1</code>、<code>2.0</code>（或更大），各跑一次，保存不同文件名，对比曲线与最终 w、b。</p>
+          <ul>
+            <li>太小：降得慢，也许 80 epoch 还没到位</li>
+            <li>适中：较快接近 2 和 1</li>
+            <li>太大：可能震荡、发散、数字很离谱</li>
+          </ul>
+
+          <div class="progress-bar" data-progress-for="ml-lab-b" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="ml-lab-b">完成 0 / 3 步</p>
+          <div class="check-panel" data-check-group="ml-lab-b">
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-b1" />
+              <span>至少跑通过 2 种不同 lr</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-b2" />
+              <span>用文字记下：哪种 lr 更稳、哪种更糟</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="ml-b3" />
+              <span>能解释为什么「学习率不是越大越好」</span>
+            </label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="ml-lab-b">清空 B 勾选</button></p>
+        </section>
+
+        <section id="ch-pass" class="chapter-block reveal">
+          <h2>过关自检</h2>
+          <div class="progress-bar" data-progress-for="ml-pass" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="ml-pass">完成 0 / 12 项</p>
+          <div class="check-panel" data-check-group="ml-pass">
+            <label class="check-item"><input type="checkbox" data-key="ml-p1" /><span>能画出口头版总流程（数据→训练→验证/测试→预测）</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p2" /><span>能用自己的话说明「模型在学什么」</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p3" /><span>能区分回归与分类，并各举一例</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p4" /><span>能区分特征 X 与标签 y</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p5" /><span>能说明 train / val / test 各自用途</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p6" /><span>知道切分要打乱、固定种子，并听说过泄漏风险</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p7" /><span>能描述过拟合的典型现象</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p8" /><span>能区分 loss 与准确率等指标的分工</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p9" /><span>能用下山比喻解释梯度与学习率</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p10" /><span>知道 epoch、batch 在说什么</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p11" /><span>能区分参数与超参数</span></label>
+            <label class="check-item"><input type="checkbox" data-key="ml-p12" /><span>实验 A、B 都完成</span></label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="ml-pass">清空过关勾选</button></p>
+          <p>全部勾完，再进入下一章「深度学习入门（PyTorch）」。</p>
+        </section>
+
+        <section id="ch-wrong" class="chapter-block reveal">
+          <h2>常见错误说法（对照纠偏）</h2>
+          <ul>
+            <li>「准确率高就是模型好」→ 看是否类别均衡、是否看了测试集、业务代价是否一样。</li>
+            <li>「loss 越低一定越好」→ 过拟合时 train loss 可以极低；要看 val/test。</li>
+            <li>「多训练一定会更好」→ epoch 太多可能过拟合；要配合验证与早停。</li>
+            <li>「梯度就是正确答案」→ 梯度是局部方向信息，加学习率才变成一步更新。</li>
+            <li>「超参数可以靠感觉一次定死」→ 通常要实验；记录每次改动与曲线。</li>
+          </ul>
+        </section>
+
+        <section id="ch-ai" class="chapter-block reveal">
+          <h2>用 AI 学这一章</h2>
+          <p>概念题：要求先比喻后术语。实验题：报告 lr 与现象，禁止直接代写实验报告。</p>
+          <pre><code>我在学深基课第三章（机器学习直觉·细讲）。
+请先打比方，再给标准术语；不要长篇堆公式。
+
+我卡住的点：____
+我目前的理解：____
+请指出错的一句，并给更正后的一句话版本。
+
+（实验）
+lr=____，现象：____
+请给 2 个最可能原因，不要重写全部代码。</code></pre>
+        </section>
+
+        <nav class="chapter-pager" aria-label="章节翻页">
+          <a class="pager-link" href="data-computing.html">← 上一章：数据与计算</a>
+          <a class="pager-link" href="pytorch-intro.html">下一章：深度学习入门 →</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <p><span class="brand-inline">深基课</span> · 机器学习直觉（细讲）</p>
+      <p class="muted"><a href="index.html">回到首页</a></p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

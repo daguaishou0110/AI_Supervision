@@ -1,0 +1,298 @@
+% Teaching template for 深基课 Chapter 08 (paper writing).
+% Example method name: Dual-Path Calibration Network (DPCNet).
+% REPLACE the example task/modules/numbers with the student's real project.
+% Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\title{Dual-Path Calibration Network for Robust Visual Recognition\\
+\large (Teaching Template --- Replace with Your Title)}
+\author{Student Name\quad Mentor Name\\
+\small Deep Foundations Course (Shenji) Writing Tutorial}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Visual recognition underpins a wide range of perception systems, yet models still struggle when local evidence and global context are poorly calibrated.
+Existing convolutional and transformer pipelines often emphasize either fine-grained textures or long-range dependencies, leaving a persistent gap in jointly stabilizing discriminative cues.
+We present the Dual-Path Calibration Network (\textbf{DPCNet}), which couples a local evidence refinement path with a global consistency calibration path under a unified training objective.
+The design directly targets two modeling challenges derived from that gap: unreliable local cue selection and weak cross-region consistency.
+Experiments on standard classification benchmarks show that DPCNet improves over strong convolutional, transformer, and hybrid baselines, while ablations, sensitivity studies, and visualizations support the contribution of each path.
+The template text is instructional; students must replace claims and numbers with results from their own runs.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Deep visual recognition has become a foundational capability for image understanding, retrieval, and downstream perception applications~\cite{deng2009imagenet,krizhevsky2012alexnet,he2016resnet}.
+With large-scale supervision and modern architectures, accuracy on canonical benchmarks has improved rapidly, and recognition backbones are routinely transferred to detection and segmentation~\cite{ren2015fasterrcnn,ronneberger2015unet,kirillov2023sam}.
+Despite this progress, practical systems still face brittle decisions when textures are ambiguous, objects are partially occluded, or long-range context conflicts with local appearance.
+These failure modes matter because recognition errors propagate to any pipeline that treats the classifier as a perception front-end.
+
+Classical convolutional networks provide strong local inductive biases and efficient hierarchical features~\cite{simonyan2015vgg,szegedy2015googlenet,huang2017densenet,xie2017resnext,tan2019efficientnet}, while attention modules further reweight channels or spatial responses~\cite{hu2018senet,woo2018cbam,wang2020eca}.
+Vision Transformers and their hierarchical variants model long-range dependencies via self-attention on patches or windows~\cite{dosovitskiy2021vit,liu2021swin,touvron2021deit,wang2021pvt,liu2022swinv2}.
+Hybrid and modernized ConvNet designs continue to narrow the gap between convolution and attention~\cite{liu2022convnext,woo2023convnextv2,li2022mvitv2}.
+Nevertheless, many pipelines still optimize a single dominant representation route: either local operators dominate and global conflicts remain unresolved, or global attention dominates and locally decisive evidence is diluted.
+The core modeling limitation is therefore not the absence of either local or global operators, but the lack of an explicit dual-path calibration mechanism that stabilizes both evidence types under one objective.
+
+This limitation raises two coupled scientific challenges.
+First, \emph{local evidence selection} remains unreliable: texture-level responses can be noisy or spuriously correlated, so the model may amplify non-causal cues even when a backbone is strong~\cite{selvaraju2017gradcam}.
+Second, \emph{global consistency calibration} remains weak: aggregating long-range context without an explicit consistency constraint can mix incompatible regional semantics, especially under clutter~\cite{vaswani2017attention,dosovitskiy2021vit}.
+Existing single-route designs typically mitigate one challenge more than the other, which leaves residual errors that look like either over-localization or over-smoothing.
+
+To address both challenges, we propose the Dual-Path Calibration Network (\textbf{DPCNet}).
+DPCNet maintains a local refinement path that reweights discriminative local responses and a global calibration path that enforces cross-region consistency, then fuses the two calibrated streams for classification.
+The local path is designed for Challenge~1, while the global path is designed for Challenge~2; their joint objective encourages complementary rather than redundant corrections.
+Self-supervised and transfer-oriented representation studies motivate the value of calibrated features~\cite{chen2020simclr,he2020moco,grill2020byol,caron2021dino,he2022mae,radford2021clip}, yet our focus is a supervised dual-path calibration architecture rather than a new pre-training paradigm.
+
+Our contributions are threefold.
+(i)~We formulate recognition failures around a single gap---missing dual-path calibration---and derive two explicit challenges on local evidence selection and global consistency.
+(ii)~We instantiate DPCNet with paired local and global calibration modules, consistent notation, and a complete training procedure.
+(iii)~We provide a full experimental protocol template covering comparisons, ablations, sensitivity, visualization, and error analysis for students to fill with verified runs.
+
+% \begin{figure}[t]
+% \centering
+% % \includegraphics[width=0.85\linewidth]{fig_motivation_example.png}
+% \caption{Illustration of the core modeling limitation of existing methods.}
+% \label{fig:motivation_example}
+% \end{figure}
+
+\section{Related Work}
+\label{sec:rw}
+
+\subsection{Convolutional Recognition and Local Attention}
+Krizhevsky et al.~\cite{krizhevsky2012alexnet} established deep CNNs as a practical recognition stack, and subsequent residual, dense, and aggregated designs improved optimization and feature reuse~\cite{he2016resnet,huang2017densenet,xie2017resnext}.
+Tan and Le~\cite{tan2019efficientnet} further studied compound scaling for accuracy--efficiency trade-offs, while mobile architectures targeted resource-constrained deployment~\cite{howard2017mobilenets,sandler2018mobilenetv2}.
+Channel and spatial attention blocks such as SE, CBAM, and ECA reweight local responses with limited overhead~\cite{hu2018senet,woo2018cbam,wang2020eca}.
+These methods are strong at encoding neighborhood structure, yet their receptive-field growth is primarily hierarchical; when distant regions disagree, local attention alone may not impose an explicit consistency correction.
+Liu et al.~\cite{liu2022convnext} and Woo et al.~\cite{woo2023convnextv2} modernize ConvNets with transformer-inspired training recipes, improving competitiveness, but still center a convolution-dominated route rather than dual-path calibration between local evidence and global consistency.
+
+\subsection{Transformer-Based and Hybrid Global Modeling}
+Dosovitskiy et al.~\cite{dosovitskiy2021vit} showed that patch-based Transformers can match or surpass CNNs when pre-trained at scale, and DeiT improved data efficiency via distillation~\cite{touvron2021deit}.
+Hierarchical Transformers such as Swin and PVT introduce multi-scale tokens and windowed attention for denser prediction friendliness~\cite{liu2021swin,wang2021pvt,liu2022swinv2}.
+Alternative token mixing designs, including MLP-Mixer and Tokens-to-Token ViT, explore different global aggregation operators~\cite{tolstikhin2021mlpmixer,yuan2021t2t,chu2021twins}.
+Self-supervised objectives further strengthen transferable features~\cite{chen2020simclr,he2020moco,chen2021mocov3,caron2021dino,zhou2022ibot,he2022mae,bao2022beit,oquab2024dinov2}.
+These lines excel at long-range interaction, yet global mixing can over-smooth decisive local cues if no dedicated local refinement path is co-trained for calibration.
+In contrast to replacing one backbone family with another, DPCNet keeps an explicit local--global dual path and focuses on their joint calibration for recognition.
+
+\section{Method}
+\label{sec:method}
+
+\subsection{Problem Formulation}
+\label{sec:formulation}
+Let an input image be $\mathbf{X}\in\mathbb{R}^{H\times W\times C}$ with label $y\in\{1,\ldots,K\}$.
+A backbone encoder $f_{\theta}$ maps $\mathbf{X}$ to an intermediate feature map $\mathbf{F}\in\mathbb{R}^{h\times w\times d}$:
+\begin{equation}
+\mathbf{F}=f_{\theta}(\mathbf{X}).
+\label{eq:backbone}
+\end{equation}
+Our goal is to learn a calibrated representation $\mathbf{z}\in\mathbb{R}^{d}$ and a classifier $g_{\phi}$ that minimizes the expected risk
+\begin{equation}
+\min_{\theta,\phi,\psi}\;\mathbb{E}_{(\mathbf{X},y)}\big[\mathcal{L}_{\mathrm{cls}}(g_{\phi}(\mathbf{z}),y)+\lambda\mathcal{L}_{\mathrm{cal}}(\mathbf{F};\psi)\big],
+\label{eq:obj}
+\end{equation}
+where $\psi$ collects calibration-module parameters, $\mathcal{L}_{\mathrm{cls}}$ is cross-entropy, and $\mathcal{L}_{\mathrm{cal}}$ regularizes dual-path consistency.
+All vectors are column vectors unless noted; $\|\cdot\|_2$ denotes the Euclidean norm.
+
+\subsection{Model Overview}
+\label{sec:overview}
+DPCNet processes $\mathbf{F}$ through a Local Evidence Refinement (LER) module and a Global Consistency Calibration (GCC) module, then fuses their outputs.
+LER addresses unreliable local cue selection; GCC addresses weak cross-region consistency.
+The overall data flow is: encode $\rightarrow$ refine locally $\rightarrow$ calibrate globally $\rightarrow$ fuse $\rightarrow$ classify.
+% Figure~\ref{fig:model_arch} illustrates the architecture.
+
+\subsection{Local Evidence Refinement}
+\label{sec:ler}
+Given $\mathbf{F}$, we compute a local importance map $\mathbf{A}_{\ell}\in\mathbb{R}^{h\times w}$ and a refined field $\mathbf{F}_{\ell}$:
+\begin{equation}
+\mathbf{A}_{\ell}=\sigma\big(\mathrm{Conv}_{1\times1}(\mathbf{F})\big),
+\label{eq:local_attn}
+\end{equation}
+\begin{equation}
+\mathbf{F}_{\ell}=\mathbf{F}\odot\mathrm{Expand}(\mathbf{A}_{\ell}),
+\label{eq:local_refine}
+\end{equation}
+where $\sigma$ is the sigmoid, $\odot$ is element-wise multiplication, and $\mathrm{Expand}$ broadcasts channel-wise.
+A pooled local descriptor is
+\begin{equation}
+\mathbf{z}_{\ell}=\mathrm{GAP}(\mathbf{F}_{\ell})\in\mathbb{R}^{d},
+\label{eq:local_pool}
+\end{equation}
+with $\mathrm{GAP}$ denoting global average pooling.
+Intuitively, Eq.~\eqref{eq:local_attn}--\eqref{eq:local_pool} suppress non-informative locations before aggregation.
+
+\subsection{Global Consistency Calibration}
+\label{sec:gcc}
+We flatten $\mathbf{F}$ into tokens $\mathbf{T}\in\mathbb{R}^{n\times d}$ with $n=hw$ and apply multi-head self-attention~\cite{vaswani2017attention}:
+\begin{equation}
+\mathbf{T}'=\mathrm{MHSA}(\mathbf{T})+\mathbf{T},
+\label{eq:mhsa}
+\end{equation}
+\begin{equation}
+\mathbf{T}_{g}=\mathrm{FFN}(\mathbf{T}')+\mathbf{T}'.
+\label{eq:ffn}
+\end{equation}
+A consistency regularizer encourages agreement among high-confidence tokens:
+\begin{equation}
+\mathcal{L}_{\mathrm{cons}}=\frac{1}{|\mathcal{P}|}\sum_{(i,j)\in\mathcal{P}}\big\|\hat{\mathbf{t}}_{i}-\hat{\mathbf{t}}_{j}\big\|_2^{2},
+\label{eq:cons}
+\end{equation}
+where $\hat{\mathbf{t}}_{i}$ is an $\ell_2$-normalized token and $\mathcal{P}$ indexes pairs above an attention threshold.
+The global descriptor is
+\begin{equation}
+\mathbf{z}_{g}=\mathrm{GAP}(\mathrm{Reshape}(\mathbf{T}_{g})).
+\label{eq:global_pool}
+\end{equation}
+
+\subsection{Fusion and Prediction}
+\label{sec:fuse}
+We fuse the two descriptors with a gated sum:
+\begin{equation}
+\boldsymbol{\alpha}=\mathrm{softmax}(\mathbf{W}_{g}[\mathbf{z}_{\ell};\mathbf{z}_{g}]),
+\label{eq:gate}
+\end{equation}
+\begin{equation}
+\mathbf{z}=\alpha_{1}\mathbf{z}_{\ell}+\alpha_{2}\mathbf{z}_{g},
+\label{eq:fuse}
+\end{equation}
+\begin{equation}
+\hat{\mathbf{y}}=\mathrm{softmax}(\mathbf{W}_{c}\mathbf{z}+\mathbf{b}_{c}).
+\label{eq:pred}
+\end{equation}
+The classification loss is
+\begin{equation}
+\mathcal{L}_{\mathrm{cls}}=-\sum_{k=1}^{K}y_{k}\log\hat{y}_{k},
+\label{eq:ce}
+\end{equation}
+and the full objective instantiates Eq.~\eqref{eq:obj} as
+\begin{equation}
+\mathcal{L}=\mathcal{L}_{\mathrm{cls}}+\lambda\mathcal{L}_{\mathrm{cons}}.
+\label{eq:total}
+\end{equation}
+
+\subsection{Training Procedure}
+\label{sec:train}
+\begin{algorithm}[t]
+\caption{Training procedure of DPCNet}
+\label{alg:train}
+\begin{algorithmic}[1]
+\Require Dataset $\mathcal{D}$, backbone $f_{\theta}$, modules $\psi$, classifier $g_{\phi}$, learning rate $\eta$, weight $\lambda$
+\Ensure Optimized parameters $\{\theta,\psi,\phi\}$
+\For{epoch $=1$ to $E$}
+  \For{each minibatch $(\mathbf{X},y)\sim\mathcal{D}$}
+    \State $\mathbf{F}\leftarrow f_{\theta}(\mathbf{X})$
+    \State Compute $\mathbf{z}_{\ell},\mathbf{z}_{g}$ via LER and GCC
+    \State Fuse $\mathbf{z}$ and predict $\hat{\mathbf{y}}$
+    \State $\mathcal{L}\leftarrow\mathcal{L}_{\mathrm{cls}}+\lambda\mathcal{L}_{\mathrm{cons}}$
+    \State Update $\{\theta,\psi,\phi\}$ with AdamW~\cite{loshchilov2019adamw}
+  \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Complexity Analysis}
+\label{sec:complexity}
+Let $n=hw$ be the token count and $d$ the channel width.
+LER is dominated by $1\times1$ convolution and pooling, i.e., $\mathcal{O}(nd)$ time per image.
+GCC attention is $\mathcal{O}(n^{2}d)$ in the dense case (or $\mathcal{O}(nwd)$ with window size $w$ if windowed attention is used~\cite{liu2021swin}).
+Training stores activations for backpropagation, yielding $\mathcal{O}(nd+Ed)$ peak feature memory aside from optimizer states.
+Relative to a pure CNN baseline, the extra cost is mainly the global path; relative to a full Transformer baseline, LER adds only linear overhead while providing an explicit local calibration branch.
+
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Experimental Setup}
+\label{sec:setup}
+\textbf{Datasets.}
+We evaluate on ImageNet-style classification settings and mid-scale benchmarks commonly used for backbone comparison~\cite{deng2009imagenet}.
+Students should state split sizes, preprocessing, and licenses for every dataset they actually run.
+
+\textbf{Baselines.}
+We compare three families: (i)~CNN baselines (ResNet, DenseNet, EfficientNet, ConvNeXt)~\cite{he2016resnet,huang2017densenet,tan2019efficientnet,liu2022convnext};
+(ii)~Transformer baselines (ViT, DeiT, Swin)~\cite{dosovitskiy2021vit,touvron2021deit,liu2021swin};
+(iii)~attention-augmented CNNs (SE, CBAM)~\cite{hu2018senet,woo2018cbam}.
+All methods must be reproduced under the same split and training recipe for fair comparison.
+
+\textbf{Metrics.}
+We report Top-1 / Top-5 accuracy (or task-specific F1/mAP).
+Define each metric equation in the student paper when non-standard.
+
+\textbf{Implementation.}
+Unless noted, we use AdamW~\cite{loshchilov2019adamw}, cosine decay, and standard augmentations such as Mixup/CutMix/RandAugment when applicable~\cite{zhang2018mixup,yun2019cutmix,cubuk2020randaugment}.
+List GPU type, epoch count, batch size, and seeds in the final manuscript.
+
+\subsection{Performance Comparison}
+\label{sec:comparison}
+% TEMPLATE PARAGRAPHS --- replace bracketed text with verified numbers from your runs.
+DPCNet attains the best overall accuracy among reproduced baselines under the shared protocol.
+On the primary benchmark, it reaches [TOP1]\% Top-1, exceeding the strongest CNN baseline by [D1] points and the strongest Transformer baseline by [D2] points, which indicates that joint local--global calibration is more effective than strengthening either route alone.
+
+Strong CNN baselines outperform lightweight mobile CNNs because residual multi-scale features preserve richer local evidence for LER to reweight, whereas aggressively compressed mobile towers discard cues before calibration.
+Quantitatively, ResNet/ConvNeXt-style models sit [G1] points above MobileNet-style counterparts on Top-1 in our reproduction table, consistent with capacity and feature fidelity differences reported in prior scaling studies~\cite{tan2019efficientnet,howard2017mobilenets}.
+
+Transformer baselines outperform classical attention-CNN hybrids on long-range dominated cases, yet can lag when local textures decide the label.
+In our table, Swin/DeiT exceed SE/CBAM by [G2] points on average Top-1, while DPCNet further improves by coupling GCC with an explicit LER path rather than relying on global mixing alone~\cite{liu2021swin,touvron2021deit,woo2018cbam}.
+
+Overall, the ranking supports a mechanistic reading: methods weak on local fidelity underperform when fine textures matter; methods weak on global consistency underperform under clutter; DPCNet reduces both error modes in the same model.
+% Insert Table~\ref{tab:comparison} with >=8 reproduced methods.
+
+\subsection{Ablation Study}
+\label{sec:ablation}
+To validate each component, we evaluate: full DPCNet; w/o LER; w/o GCC; w/o consistency loss $\mathcal{L}_{\mathrm{cons}}$; and a fusion-replacement variant that concatenates $\mathbf{z}_{\ell},\mathbf{z}_{g}$ without gating.
+Removing LER primarily hurts fine-grained categories, confirming Challenge~1.
+Removing GCC increases confusion among context-heavy classes, confirming Challenge~2.
+Removing $\mathcal{L}_{\mathrm{cons}}$ preserves architecture but weakens consistency, yielding a smaller yet consistent drop.
+[Replace with table numbers and paragraph-length analysis tied to mechanisms.]
+
+\subsection{Parameter Analysis}
+\label{sec:param}
+We study the consistency weight $\lambda$ and the LER bottleneck width.
+Performance peaks at moderate $\lambda$: too small under-regularizes global tokens, too large over-smooths class boundaries.
+Width sweeps show diminishing returns beyond a compact setting, suggesting calibration quality matters more than merely widening the local gate.
+[Plot curves from real sweeps; explain with the same dual-challenge language.]
+
+\subsection{Visualization Analysis}
+\label{sec:vis}
+To examine whether DPCNet improves separability, we compare baseline versus DPCNet features with t-SNE/UMAP~\cite{vandermaaten2008tsne,mcinnes2018umap} on a fixed probe set and seed.
+We further visualize LER maps and Grad-CAM responses~\cite{selvaraju2017gradcam} to check whether local refinement focuses on object support rather than background.
+Cleaner clusters and more object-aligned highlights provide qualitative support for the two calibration paths.
+[Describe actual figures after generation.]
+
+\subsection{Case and Error Analysis}
+\label{sec:error}
+We present cases where the baseline fails but DPCNet succeeds, typically when local texture is weak yet global structure is consistent, or the reverse.
+Residual errors concentrate on fine-grained pairs with nearly identical local patterns, indicating that dual-path calibration mitigates but does not eliminate intrinsic ambiguity.
+These observations bound the method's applicability and motivate future disambiguation modules.
+
+\section{Conclusion}
+\label{sec:concl}
+
+\subsection{Summary}
+This work revisited visual recognition through the lens of missing dual-path calibration between local evidence and global consistency.
+We derived two challenges---unreliable local cue selection and weak cross-region consistency---and introduced DPCNet to address them with LER and GCC under a unified objective.
+Template experiments outline how comparisons, ablations, and analyses should substantiate that the full model surpasses strong single-route baselines and its own degraded variants.
+
+\subsection{Limitations}
+DPCNet assumes that useful local and global cues coexist in the same feature map and that pairwise token consistency is a meaningful surrogate for semantic agreement.
+When categories are defined by compositional rules beyond appearance similarity, consistency regularization may align the wrong tokens.
+The gated fusion also assumes that a static mixture of two descriptors is sufficient; tasks requiring conditional routing across many experts may expose this restriction.
+
+\subsection{Future Work}
+Corresponding to the first limitation, future work may replace appearance-based consistency with structure-aware constraints that incorporate part--whole relations.
+Corresponding to the second limitation, extending gated fusion toward conditional computation or mixture-of-experts routing is a concrete next step.
+A further direction is to test whether the same dual-path calibration transfers to dense prediction heads without changing the challenge formulation.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

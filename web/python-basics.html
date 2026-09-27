@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Python 底子（零基础）· 深基课</title>
+  <meta name="description" content="给从未学过编程的本科生：从安装 Python、写第一行代码，到变量、判断、循环、列表、字典、函数、文件与虚拟环境。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-chapter">
+  <a class="skip" href="#chapter-main">跳到正文</a>
+
+  <header class="top">
+    <a class="brand-mark" href="index.html">深基课</a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="index.html#learn">学习清单</a>
+      <a href="#toc">本章目录</a>
+      <a href="#ch-pass">过关标准</a>
+    </nav>
+  </header>
+
+  <main id="chapter-main">
+    <header class="chapter-hero">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">深基课</a> / <a href="index.html#learn">先学什么</a> / Python 底子</p>
+        <p class="section-kicker">第一章 · 01 · 零基础细讲</p>
+        <h1>Python 底子</h1>
+        <p class="chapter-lead">这一章默认你<strong>没学过编程</strong>。<strong>真正的第一步不是背语法，而是把 Python 下载安装好、把环境配通</strong>——终端里能跑出版本号，再谈写代码。后面每一节：看一小段 → 敲一遍 → 运行一遍。</p>
+        <p class="chapter-goal"><strong>过关目标：</strong>① 本机 Python / 编辑器 / 练习文件夹就绪；② 能独立新建 <code>.py</code>，读写文本并处理；③ 报错时能看懂最后几行在说什么。</p>
+      </div>
+    </header>
+
+    <div class="chapter-layout wrap">
+      <nav class="toc" id="toc" aria-label="章节目录">
+        <p class="toc-title">本章目录</p>
+        <ol>
+          <li><a href="#ch-0">怎么学 · 从哪开始</a></li>
+          <li><a href="#ch-1">第一步：下载安装 Python</a></li>
+          <li><a href="#ch-2">配置环境：终端与编辑器</a></li>
+          <li><a href="#ch-3">第一个程序</a></li>
+          <li><a href="#ch-4">注释与缩进</a></li>
+          <li><a href="#ch-5">变量：给数据起名</a></li>
+          <li><a href="#ch-6">数字与运算</a></li>
+          <li><a href="#ch-7">字符串</a></li>
+          <li><a href="#ch-8">条件判断 if</a></li>
+          <li><a href="#ch-9">循环 for</a></li>
+          <li><a href="#ch-10">列表 list</a></li>
+          <li><a href="#ch-11">字典 dict</a></li>
+          <li><a href="#ch-12">函数 def</a></li>
+          <li><a href="#ch-13">读写文件</a></li>
+          <li><a href="#ch-14">报错怎么读</a></li>
+          <li><a href="#ch-15">虚拟环境与 pip</a></li>
+          <li><a href="#ch-16">综合练习（分步）</a></li>
+          <li><a href="#ch-pass">过关自检</a></li>
+          <li><a href="#ch-ai">用 AI 学这一章</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+
+        <section id="ch-0" class="chapter-block reveal">
+          <h2>0. 怎么学 · 从哪开始</h2>
+          <p>零基础最容易犯的错有两个：一是<strong>环境没配好就猛学语法</strong>；二是把教程当小说看完，却一行都没跑过。</p>
+          <p>本章顺序固定为：</p>
+          <ol>
+            <li><strong>下载安装 Python</strong>（勾选 PATH）</li>
+            <li><strong>配置环境</strong>（终端验证、装编辑器、建练习文件夹）</li>
+            <li>再写第一个程序，然后学变量、判断、循环……</li>
+          </ol>
+          <div class="callout">
+            <p><strong>建议时间：</strong>仅「安装 + 配环境」留出 30–60 分钟，一次配通。整章语法部分约 8–12 小时，可拆成多天。配不通不要硬往下背概念。</p>
+          </div>
+          <div class="callout callout-warn">
+            <p><strong>你需要准备：</strong>一台 Windows 电脑（本节按 Windows 写）、能上网。手机不适合做环境配置和练习。</p>
+          </div>
+        </section>
+
+        <section id="ch-1" class="chapter-block reveal">
+          <h2>1. 第一步：下载安装 Python</h2>
+          <p>Python 是一种编程语言；你要先在电脑上安装它的「运行器」（解释器）。没装好之前，写再多代码也跑不起来。</p>
+
+          <h3>1.1 下载</h3>
+          <ol>
+            <li>用浏览器打开官网下载页：<a href="https://www.python.org/downloads/" target="_blank" rel="noopener">https://www.python.org/downloads/</a></li>
+            <li>点黄色大按钮下载 Windows 安装包（一般是最新的 Python 3.x，如 3.11 / 3.12 / 3.13 均可入门）。</li>
+            <li>得到一个类似 <code>python-3.xx.x-amd64.exe</code> 的安装文件。</li>
+          </ol>
+          <div class="callout">
+            <p><strong>说明：</strong>尽量从官网下载。第三方「绿色版 / 破解包」容易缺组件或带来安全风险，初学不建议。</p>
+          </div>
+
+          <h3>1.2 安装（最关键的一步）</h3>
+          <ol>
+            <li>双击安装包。</li>
+            <li>进入安装界面后，先看底部选项：<strong>务必勾选</strong> <code>Add python.exe to PATH</code>（把 Python 加入系统路径）。</li>
+            <li>再选 <code>Install Now</code>（或自定义安装也行，初学用默认即可）。</li>
+            <li>等待完成，看到 Setup was successful / 安装成功，关闭窗口。</li>
+          </ol>
+          <figure class="figure">
+            <img src="assets/python-install-path.png" alt="安装界面示意：必须勾选 Add python.exe to PATH" width="1600" height="900" loading="lazy" />
+            <figcaption>示意：安装时勾选 Add python.exe to PATH。漏勾是新手环境失败的第一大原因。</figcaption>
+          </figure>
+          <div class="callout callout-warn">
+            <p><strong>为什么 PATH 这么重要？</strong>勾了之后，你才能在任意终端里直接输入 <code>python</code>。没勾的话，常会出现「找不到 python」或「不是内部或外部命令」。</p>
+          </div>
+
+          <h3>1.3 安装后立刻验证</h3>
+          <ol>
+            <li>关掉旧的终端窗口（如果之前开着），重新打开一个。<strong>新开</strong>很重要，否则可能读不到刚改的 PATH。</li>
+            <li>打开方式：开始菜单搜索 <code>PowerShell</code> 或 <code>终端</code> / <code>cmd</code>。</li>
+            <li>输入下面命令，回车：</li>
+          </ol>
+          <pre><code>python --version</code></pre>
+          <p>成功示例：<code>Python 3.12.3</code>（版本号不必相同，有 <code>Python 3.x</code> 即可）。</p>
+          <p>再试一条：</p>
+          <pre><code>python -c "print(1+1)"</code></pre>
+          <p>应输出 <code>2</code>。这说明：Python 已装好，并且能执行指令。</p>
+
+          <h3>1.4 如果失败了（按顺序排查）</h3>
+          <ul>
+            <li>提示找不到命令 / 不是内部或外部命令 → 多半没勾 PATH。最省事：卸载后重装，这次务必勾选；或重新运行安装包选 Modify，勾上 PATH 相关选项。</li>
+            <li>输入 <code>python</code> 却弹出微软应用商店 → 在「设置 → 应用 → 高级应用设置 → 应用执行别名」里，关掉两个 <code>python.exe</code> / <code>python3.exe</code> 别名，再新开终端重试。</li>
+            <li><code>py --version</code> 能通但 <code>python</code> 不通 → 可暂时用 <code>py</code> 命令，同时建议修好 PATH，统一用 <code>python</code>。</li>
+            <li>装了多次、版本混乱 → 开始菜单搜 Python，看装了几个；入门阶段保留一个 3.x 即可，把版本号记下来问老师。</li>
+          </ul>
+
+          <div class="progress-bar" data-progress-for="env-install" aria-hidden="true">
+            <div class="progress-fill"></div>
+          </div>
+          <p class="progress-text" data-progress-text-for="env-install">完成 0 / 3 步</p>
+          <div class="check-panel" data-check-group="env-install">
+            <label class="check-item">
+              <input type="checkbox" data-key="env-download" />
+              <span>已从官网下载并完成安装，且勾选了 PATH</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="env-version" />
+              <span><code>python --version</code> 能显示 Python 3.x</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="env-print" />
+              <span><code>python -c "print(1+1)"</code> 输出 2</span>
+            </label>
+          </div>
+          <p class="panel-actions">
+            <button type="button" class="btn-text" data-reset-group="env-install">清空安装勾选</button>
+          </p>
+          <p class="tip"><strong>过关线：</strong>上面 3 项都勾上，再进入下一节。配不通不要跳到语法。</p>
+        </section>
+
+        <section id="ch-2" class="chapter-block reveal">
+          <h2>2. 配置环境：终端、文件夹与编辑器</h2>
+          <p>Python 装好只是一半。还要有一个<strong>写代码的地方</strong>，以及你每次练习都待在同一个文件夹里，避免「文件找不到」。</p>
+
+          <h3>2.1 认识终端（命令行）</h3>
+          <p>终端是你给电脑下文字命令的窗口。后面 <code>python hello.py</code>、<code>pip install</code> 都在这里完成。</p>
+          <ul>
+            <li>Windows 推荐用 <strong>PowerShell</strong> 或系统「终端」应用。</li>
+            <li>提示符里通常会显示当前所在文件夹路径。</li>
+            <li>常用：<code>cd 文件夹路径</code> 用来进入目录；<code>dir</code>（cmd）或 <code>ls</code>（PowerShell）用来查看当前有哪些文件。</li>
+          </ul>
+          <pre><code>cd D:\shenji-python
+dir</code></pre>
+
+          <h3>2.2 建练习文件夹</h3>
+          <p>例如在 D 盘（或桌面）新建：<code>D:\shenji-python</code>。名字尽量用英文和数字，少用空格和中文，后面路径不容易出错。</p>
+          <p>以后本章所有 <code>.py</code> 都放进这个文件夹。</p>
+
+          <h3>2.3 安装代码编辑器（三选一即可）</h3>
+          <p>不要用 Word。下面任选一个能写代码、能开终端的工具；课上若老师指定，以老师为准。</p>
+          <ul>
+            <li><strong>VS Code</strong>（免费，普及）：<a href="https://code.visualstudio.com/" target="_blank" rel="noopener">code.visualstudio.com</a></li>
+            <li><strong>Cursor</strong>（AI 编程编辑器）：适合边写边问 AI，按老师要求安装即可</li>
+            <li><strong>Codex</strong>（OpenAI 的 AI 编程助手 / 相关客户端）：同样可用于写代码、改错、补全；安装与登录方式按老师发放的说明操作</li>
+          </ul>
+          <div class="callout">
+            <p><strong>怎么选：</strong>不会选就先装 <strong>VS Code</strong> 把环境跑通。后面「用 AI 写代码」时，Cursor 与 Codex 用法类似——一次只让 AI 写一小块，并自己验收。</p>
+          </div>
+          <ol>
+            <li>安装编辑器（或 Codex 客户端）。</li>
+            <li>打开工具 → 打开 / 选择文件夹 → 选中 <code>D:\shenji-python</code>。</li>
+            <li>左侧（或项目区）能看到该文件夹，说明工作区对了。</li>
+            <li>（可选）若用 VS Code，可安装 Python 扩展便于高亮；没有也能先写。</li>
+          </ol>
+
+          <h3>2.4 在编辑器里打开终端（推荐）</h3>
+          <p>VS Code / Cursor / Codex 相关环境里，一般都能打开集成终端（常见入口：菜单「终端 → 新建终端」，或快捷面板搜索 Terminal）。终端默认落在当前项目文件夹，少敲很多 <code>cd</code>。</p>
+
+          <div class="progress-bar" data-progress-for="env-setup" aria-hidden="true">
+            <div class="progress-fill"></div>
+          </div>
+          <p class="progress-text" data-progress-text-for="env-setup">完成 0 / 3 步</p>
+          <div class="check-panel" data-check-group="env-setup">
+            <label class="check-item">
+              <input type="checkbox" data-key="env-folder" />
+              <span>已创建练习文件夹（如 <code>D:\shenji-python</code>）</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="env-editor" />
+              <span>已安装编辑器（VS Code / Cursor / Codex 任一），并打开到练习目录</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="env-terminal" />
+              <span>能在终端里 <code>cd</code> 进该文件夹，并用 <code>dir</code> / <code>ls</code> 看到它</span>
+            </label>
+          </div>
+          <p class="panel-actions">
+            <button type="button" class="btn-text" data-reset-group="env-setup">清空环境勾选</button>
+          </p>
+          <p class="tip"><strong>过关线：</strong>安装 Python（上一节）+ 本节 3 项都完成后，再写第一个程序。</p>
+        </section>
+
+        <section id="ch-3" class="chapter-block reveal">
+          <h2>3. 第一个程序</h2>
+          <p>程序 = 一串按顺序执行的指令。你写成 <code>.py</code> 文件，再让 Python 一行行执行；用 <code>print</code> 把结果打印到终端。</p>
+          <ol>
+            <li>在练习文件夹新建文件：<code>hello.py</code></li>
+            <li>写入下面一行（注意是英文引号）：</li>
+          </ol>
+          <pre><code>print("你好，深基课")</code></pre>
+          <ol start="3">
+            <li>保存文件（Ctrl+S）。</li>
+            <li>确认终端已在练习文件夹内，再运行：</li>
+          </ol>
+          <pre><code>cd D:\shenji-python
+python hello.py</code></pre>
+          <p>成功时，终端会打印：<code>你好，深基课</code>。</p>
+          <figure class="figure">
+            <img src="assets/python-workspace.png" alt="示意图：左侧编辑器写 hello.py，右侧终端运行并看到输出" width="1600" height="900" loading="lazy" />
+            <figcaption>对照示意：左边写代码 → 保存 → 右边终端运行 → 看输出。你的界面外观可能不同，但流程一样。</figcaption>
+          </figure>
+          <h3>这行代码在干什么？</h3>
+          <ul>
+            <li><code>print</code>：Python 自带的「打印」功能（函数）。</li>
+            <li>后面的括号 <code>()</code>：把要打印的内容传给它。</li>
+            <li><code>"你好，深基课"</code>：一段文字，叫做<strong>字符串</strong>。必须用引号包起来。</li>
+          </ul>
+          <div class="callout callout-warn">
+            <p><strong>常见翻车：</strong></p>
+            <ul>
+              <li>用了中文引号 <code>“”</code> → 报错。改成英文 <code>"</code> 或 <code>'</code>。</li>
+              <li>文件没保存就运行 → 还是旧内容。先 Ctrl+S。</li>
+              <li>终端不在该文件夹 → <code>can't open file</code>。先 <code>cd</code> 进去，或在编辑器里对文件右键「在终端中运行」。</li>
+              <li>仍提示没有 python → 回到第 1 节把安装与 PATH 修好，不要先改代码。</li>
+            </ul>
+          </div>
+          <p class="tip"><strong>动手：</strong>把打印内容改成你的名字，再运行一次。再试 <code>print(1 + 2)</code>，观察和打印文字有什么不同。</p>
+        </section>
+
+        <section id="ch-4" class="chapter-block reveal">
+          <h2>4. 注释与缩进（新手必过关）</h2>
+          <h3>注释</h3>
+          <p>以 <code>#</code> 开头的行是给人看的说明，电脑会忽略：</p>
+          <pre><code># 这是注释，不会执行
+print("这行会执行")</code></pre>
+          <h3>缩进</h3>
+          <p>Python 用<strong>行首空格</strong>表示「这段代码属于上面那一块」。别的语言常用大括号 <code>{}</code>，Python 用缩进，这是最大的习惯差异。</p>
+          <pre><code>if True:
+    print("这一行前面有缩进，属于 if")
+print("这一行没有缩进，不属于 if")</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>铁律：</strong>同一层级缩进必须一致。建议一律用 4 个空格，不要混用 Tab 和空格。编辑器一般可设置「按 Tab 插入 4 空格」。</p>
+          </div>
+          <p>缩进错了，常见报错是 <code>IndentationError</code>。看到这个词，先查空格，别先怀疑逻辑。</p>
+        </section>
+
+        <section id="ch-5" class="chapter-block reveal">
+          <h2>5. 变量：给数据起名</h2>
+          <p>变量就像贴了标签的盒子。标签是名字，盒子里是值。</p>
+          <pre><code>name = "小陈"
+age = 20
+height = 1.75
+is_student = True
+
+print(name)
+print(age)
+print(type(name), type(age), type(height), type(is_student))</code></pre>
+          <h3>四种最常用类型</h3>
+          <ul>
+            <li><code>str</code>：字符串（文字）</li>
+            <li><code>int</code>：整数</li>
+            <li><code>float</code>：小数</li>
+            <li><code>bool</code>：布尔值，只有 <code>True</code> / <code>False</code>（注意首字母大写）</li>
+          </ul>
+          <h3>命名习惯（现在养成）</h3>
+          <ul>
+            <li>用英文或拼音，如 <code>learning_rate</code>、<code>batch_size</code></li>
+            <li>多个词用下划线连接（蛇形命名）</li>
+            <li>不要用 <code>1name</code>（不能数字开头），不要用 <code>print</code>、<code>list</code> 这种 Python 已有的名字当变量名</li>
+          </ul>
+          <div class="callout">
+            <p><strong>重要直觉：</strong><code>x = 3</code> 不是数学里的「x 恒等于 3」，而是「现在把名字 x 指向 3」。可以再写 <code>x = 5</code>，名字还在，值换了。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>定义 <code>lr</code>、<code>epochs</code>、<code>model_name</code> 三个变量并打印。用 <code>type(...)</code> 确认类型。</p>
+        </section>
+
+        <section id="ch-6" class="chapter-block reveal">
+          <h2>6. 数字与运算</h2>
+          <pre><code>a = 10
+b = 3
+print(a + b)   # 加 13
+print(a - b)   # 减 7
+print(a * b)   # 乘 30
+print(a / b)   # 除 3.333...（结果是 float）
+print(a // b)  # 整除 3
+print(a % b)   # 余数 1
+print(a ** b)  # 乘方 1000</code></pre>
+          <p>深度学习里常见：学习率 <code>0.001</code>、batch 大小 <code>32</code>、算平均 loss 等，都是这些运算。</p>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong><code>/</code> 即使两个整数相除，在 Python 3 里也会得到小数。需要整数商时用 <code>//</code>。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>分数 <code>[80, 90, 70]</code>，手算平均，再用代码 <code>(80+90+70)/3</code> 验证。</p>
+        </section>
+
+        <section id="ch-7" class="chapter-block reveal">
+          <h2>7. 字符串（文字）</h2>
+          <pre><code>s1 = "hello"
+s2 = 'world'          # 单引号也可以
+s3 = s1 + " " + s2    # 拼接
+print(s3)
+print(len(s3))        # 长度
+print(s3[0])          # 第一个字符
+print(s3[-1])         # 最后一个字符</code></pre>
+          <h3>把变量嵌进句子：f-string（强烈推荐）</h3>
+          <pre><code>epoch = 3
+loss = 0.56
+print(f"第 {epoch} 轮，loss={loss}")</code></pre>
+          <p><code>f"..."</code> 里用 <code>{变量名}</code> 插入值。后面写训练日志会一直用到。</p>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>数字和字符串不能直接相加。<code>"轮次" + 3</code> 会报错。写成 <code>f"轮次{3}"</code> 或 <code>"轮次" + str(3)</code>。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>用 f-string 打印：你的姓名、年级、一句「我在学深基课」。</p>
+        </section>
+
+        <section id="ch-8" class="chapter-block reveal">
+          <h2>8. 条件判断 if</h2>
+          <p>让程序按情况走不同分支：</p>
+          <pre><code>score = 75
+
+if score >= 90:
+    print("优秀")
+elif score >= 60:
+    print("及格")
+else:
+    print("不及格")</code></pre>
+          <ul>
+            <li><code>if</code>：如果条件成立就执行缩进块</li>
+            <li><code>elif</code>：否则如果（可以有多个）</li>
+            <li><code>else</code>：前面都不成立时</li>
+            <li>条件后面必须有英文冒号 <code>:</code></li>
+          </ul>
+          <h3>常用比较</h3>
+          <ul>
+            <li><code>==</code> 等于（两个等号！一个 <code>=</code> 是赋值）</li>
+            <li><code>!=</code> 不等于</li>
+            <li><code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></li>
+            <li><code>and</code> / <code>or</code> / <code>not</code> 组合条件</li>
+          </ul>
+          <pre><code>acc = 0.91
+if acc >= 0.9 and acc <= 1.0:
+    print("准确率看起来正常")</code></pre>
+          <p class="tip"><strong>动手：</strong>改 <code>score</code> 为 55、60、95，各跑一次，确认三种输出都会出现。</p>
+        </section>
+
+        <section id="ch-9" class="chapter-block reveal">
+          <h2>9. 循环 for（重复做事）</h2>
+          <p>训练模型常说「跑 20 个 epoch」——本质就是循环 20 次。</p>
+          <pre><code>for i in range(5):
+    print(f"第 {i} 次")</code></pre>
+          <p><code>range(5)</code> 产生 <code>0,1,2,3,4</code>（从 0 开始，不包含 5）。</p>
+          <pre><code>names = ["甲", "乙", "丙"]
+for name in names:
+    print(name)</code></pre>
+          <h3>和 while 的区别（先有个印象）</h3>
+          <p><code>for</code> 适合「已知要循环多少次 / 遍历一个列表」；<code>while</code> 适合「条件成立就一直做」。零基础阶段先把 <code>for</code> 用熟即可。</p>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>忘记冒号、忘记缩进；或误以为 <code>range(5)</code> 是 1 到 5。打印出来看一眼就明白。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>用循环打印 1 到 10；再用循环计算 <code>1+2+...+10</code>（准备一个 <code>total = 0</code>，循环里累加）。</p>
+        </section>
+
+        <section id="ch-10" class="chapter-block reveal">
+          <h2>10. 列表 list：一串有顺序的数据</h2>
+          <p>列表用方括号。深度学习里的一批 loss、一组文件名，常用列表。</p>
+          <pre><code>losses = [0.9, 0.7, 0.55]
+print(losses[0])     # 0.9，下标从 0 开始
+print(losses[-1])    # 0.55，最后一项
+print(len(losses))   # 3
+
+losses.append(0.48)  # 在末尾追加
+print(losses)
+
+# 遍历
+for loss in losses:
+    print(loss)
+
+# 求和 / 平均
+print(sum(losses))
+print(sum(losses) / len(losses))</code></pre>
+          <h3>切片（先会用即可）</h3>
+          <pre><code>nums = [10, 20, 30, 40, 50]
+print(nums[1:4])   # [20, 30, 40]，含左不含右</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong><code>losses[3]</code> 在只有 3 个元素时会 <code>IndexError</code>（合法下标是 0、1、2）。先 <code>len</code> 再取下标。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>建立本学期三门课分数列表，打印最高分（可用 <code>max</code>）、最低分、平均分。</p>
+        </section>
+
+        <section id="ch-11" class="chapter-block reveal">
+          <h2>11. 字典 dict：用名字取值</h2>
+          <p>字典用花括号，里面是「键: 值」。适合存配置、一条样本的多个字段。</p>
+          <pre><code>config = {
+    "lr": 0.001,
+    "batch_size": 32,
+    "model": "resnet18",
+}
+
+print(config["lr"])
+config["epochs"] = 20          # 新增或修改
+print(config)
+
+# 遍历键和值
+for key, value in config.items():
+    print(key, value)</code></pre>
+          <ul>
+            <li>取值用 <code>config["lr"]</code>，键必须存在，否则 <code>KeyError</code></li>
+            <li>不确定键在不在时，用 <code>config.get("lr")</code>（没有则返回 <code>None</code>）</li>
+          </ul>
+          <p class="tip"><strong>动手：</strong>做一个学生字典：姓名、学号、分数列表。打印姓名，并算分数平均。</p>
+        </section>
+
+        <section id="ch-12" class="chapter-block reveal">
+          <h2>12. 函数 def：把一段逻辑打包</h2>
+          <p>函数 = 起个名字的可复用代码块。输入（参数）进去，输出（return）出来。</p>
+          <pre><code>def average(nums):
+    """计算列表平均值。若列表为空，返回 0.0"""
+    if len(nums) == 0:
+        return 0.0
+    return sum(nums) / len(nums)
+
+scores = [80, 90, 70]
+result = average(scores)
+print(result)</code></pre>
+          <h3>逐行理解</h3>
+          <ul>
+            <li><code>def average(nums):</code>：定义函数，名字叫 <code>average</code>，接收参数 <code>nums</code></li>
+            <li>函数体必须缩进</li>
+            <li><code>return</code>：把结果送回调用处；没有 <code>return</code> 时默认得到 <code>None</code></li>
+            <li>调用：<code>average(scores)</code>——注意要加括号</li>
+          </ul>
+          <h3>为什么要写函数？</h3>
+          <p>后面读数据、算准确率、保存结果，都会反复出现。写成函数后，主流程能读成「故事」：先读数据，再训练，再评估——而不是一百行糊在一起。</p>
+          <p class="tip"><strong>动手：</strong>写 <code>def grade(score):</code>，返回 <code>"优秀"</code> / <code>"及格"</code> / <code>"不及格"</code>。对 55、60、95 各调用一次。</p>
+        </section>
+
+        <section id="ch-13" class="chapter-block reveal">
+          <h2>13. 读写文件</h2>
+          <p>数据、日志、预测结果都在文件里。先掌握<strong>文本文件</strong>。</p>
+          <h3>写入</h3>
+          <pre><code>with open("notes.txt", "w", encoding="utf-8") as f:
+    f.write("epoch=1 loss=0.82\n")
+    f.write("epoch=2 loss=0.71\n")</code></pre>
+          <ul>
+            <li><code>"w"</code>：写入模式（文件已存在会被覆盖）</li>
+            <li><code>encoding="utf-8"</code>：中文不容易乱码</li>
+            <li><code>\n</code>：换行</li>
+            <li><code>with ... as f</code>：用完自动关闭文件，养成习惯</li>
+          </ul>
+          <h3>读取</h3>
+          <pre><code>with open("notes.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+print(text)
+
+# 或者一行行读
+with open("notes.txt", "r", encoding="utf-8") as f:
+    for line in f:
+        print(line.strip())  # strip 去掉首尾空白和换行</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>坑：</strong>找不到文件 <code>FileNotFoundError</code>——多半是终端当前目录不对，或文件名拼写错。用编辑器看清文件到底在哪个文件夹。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>写入三行自己的笔记；再读出来打印。然后只打印第二行。</p>
+        </section>
+
+        <section id="ch-14" class="chapter-block reveal">
+          <h2>14. 报错怎么读（比会写新语法更重要）</h2>
+          <p>报错不是「电脑骂你」，是一份定位说明书。请从<strong>最后几行</strong>看起：</p>
+          <pre><code>Traceback (most recent call last):
+  File "D:\shenji-python\hello.py", line 3, in &lt;module&gt;
+    print(scores[10])
+IndexError: list index out of range</code></pre>
+          <figure class="figure">
+            <img src="assets/python-error-read.png" alt="示意图：报错信息中标注文件行号、出错代码、错误类型三处" width="1600" height="900" loading="lazy" />
+            <figcaption>读报错三步：① 文件与行号 → ② 那一行代码 → ③ 最后一行的错误类型。先看尾巴，再往上翻。</figcaption>
+          </figure>
+          <ul>
+            <li><strong>哪份文件、第几行</strong>：<code>hello.py</code> 第 3 行</li>
+            <li><strong>错误类型</strong>：<code>IndexError</code></li>
+            <li><strong>一句话原因</strong>：下标超出范围</li>
+          </ul>
+          <h3>新手高频错误类型</h3>
+          <ul>
+            <li><code>SyntaxError</code>：语法写错（缺冒号、引号不配对）</li>
+            <li><code>IndentationError</code>：缩进问题</li>
+            <li><code>NameError</code>：用了没定义的名字（拼写错或没赋值）</li>
+            <li><code>TypeError</code>：类型不匹配（字符串加数字等）</li>
+            <li><code>KeyError</code> / <code>IndexError</code>：字典键或列表下标不对</li>
+            <li><code>FileNotFoundError</code>：文件路径不对</li>
+          </ul>
+          <div class="callout">
+            <p><strong>习惯：</strong>先自己根据「文件 + 行号 + 错误类型」猜一分钟，再问人 / 问 AI。把完整报错原样复制，不要截半截。</p>
+          </div>
+        </section>
+
+        <section id="ch-15" class="chapter-block reveal">
+          <h2>15. 虚拟环境与 pip（为后面装 PyTorch 做准备）</h2>
+          <p>你的电脑上可能有很多项目。虚拟环境（venv）= 给当前项目单独开一间「干净的库房」，包装在里面，不污染系统。</p>
+          <h3>创建</h3>
+          <pre><code>cd D:\shenji-python
+python -m venv .venv</code></pre>
+          <p>会多出一个 <code>.venv</code> 文件夹（不用手改里面的文件）。</p>
+          <h3>激活（Windows PowerShell）</h3>
+          <pre><code>.\.venv\Scripts\Activate.ps1</code></pre>
+          <p>成功后，行首通常出现 <code>(.venv)</code>。若提示无法运行脚本，可能是执行策略限制，可在老师指导下调整，或改用：</p>
+          <pre><code>.\.venv\Scripts\activate.bat</code></pre>
+          <h3>用 pip 装包</h3>
+          <pre><code>python -m pip install -U pip
+python -m pip install numpy</code></pre>
+          <p>验证：</p>
+          <pre><code>python -c "import numpy; print(numpy.__version__)"</code></pre>
+          <div class="callout callout-warn">
+            <p><strong>铁律：</strong>装包前先看终端有没有 <code>(.venv)</code>。没有的话，可能装到系统 Python 里去了，后面项目会乱。</p>
+          </div>
+          <p class="tip"><strong>动手：</strong>创建并激活 venv，安装 numpy，打印版本号。退出环境可输入 <code>deactivate</code>。</p>
+        </section>
+
+        <section id="ch-16" class="chapter-block reveal">
+          <h2>16. 综合练习（请分步做完）</h2>
+          <p>在练习文件夹新建 <code>score_report.py</code>。按步骤实现，<strong>每做完一步就在下面打勾</strong>（进度会保存在本机浏览器里，刷新不丢）。</p>
+
+          <div class="progress-bar" data-progress-for="practice-python" aria-hidden="true">
+            <div class="progress-fill"></div>
+          </div>
+          <p class="progress-text" data-progress-text-for="practice-python">完成 0 / 4 步</p>
+
+          <div class="check-panel" data-check-group="practice-python">
+            <label class="check-item">
+              <input type="checkbox" data-key="practice-a" />
+              <span><strong>步骤 A · 数据</strong>：用字典保存一名学生（姓名 + 三门分数列表），并能 <code>print</code> 出来。</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="practice-b" />
+              <span><strong>步骤 B · 函数</strong>：写好 <code>mean(scores)</code> 与 <code>level(avg)</code>，对你的分数调用一次并打印结果。</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="practice-c" />
+              <span><strong>步骤 C · 写文件</strong>：把姓名、分数、平均分、等级写入 <code>report.txt</code>（UTF-8），用资源管理器能打开看到内容。</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="practice-d" />
+              <span><strong>步骤 D · 读文件</strong>：用代码读回 <code>report.txt</code> 并打印，确认与写入一致。</span>
+            </label>
+          </div>
+          <p class="panel-actions">
+            <button type="button" class="btn-text" data-reset-group="practice-python">清空本练习勾选</button>
+          </p>
+
+          <p>参考实现（先自己写；实在卡住再对照，对照后合上重写一遍）：</p>
+          <pre><code>def mean(scores):
+    return sum(scores) / len(scores)
+
+def level(avg):
+    if avg >= 90:
+        return "优秀"
+    elif avg >= 60:
+        return "及格"
+    else:
+        return "不及格"
+
+student = {"name": "小陈", "scores": [88, 76, 93]}
+avg = mean(student["scores"])
+grade = level(avg)
+
+lines = [
+    f"name={student['name']}",
+    f"scores={student['scores']}",
+    f"mean={avg:.2f}",
+    f"level={grade}",
+]
+
+with open("report.txt", "w", encoding="utf-8") as f:
+    f.write("\n".join(lines) + "\n")
+
+with open("report.txt", "r", encoding="utf-8") as f:
+    print(f.read())</code></pre>
+        </section>
+
+        <section id="ch-pass" class="chapter-block reveal">
+          <h2>过关自检（请逐条打勾）</h2>
+          <p>全部勾完再进下一章。勾选会保存在本机浏览器；换电脑或清缓存会丢失，属正常。</p>
+
+          <div class="progress-bar" data-progress-for="pass-python" aria-hidden="true">
+            <div class="progress-fill"></div>
+          </div>
+          <p class="progress-text" data-progress-text-for="pass-python">完成 0 / 11 项</p>
+
+          <div class="check-panel" data-check-group="pass-python">
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-0a" />
+              <span>已下载安装 Python，勾选 PATH，<code>python --version</code> 正常</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-0b" />
+              <span>已配置练习文件夹 + 编辑器（VS Code / Cursor / Codex 任一），能在终端进入该目录</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-1" />
+              <span>能用 <code>python 某文件.py</code> 跑通第一个脚本</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-2" />
+              <span>知道 <code>print</code>、变量、四种基本类型，会用 f-string</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-3" />
+              <span>理解缩进；能写简单的 <code>if</code> / <code>for</code></span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-4" />
+              <span>会创建、读取、追加列表；会用字典存配置或一条记录</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-5" />
+              <span>能自己写带 <code>return</code> 的函数并调用</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-6" />
+              <span>会用 <code>with open</code> 读写 UTF-8 文本</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-7" />
+              <span>看到报错会先看「文件、行号、错误类型」</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-8" />
+              <span>会创建/激活 venv，会用 <code>python -m pip install</code></span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" data-key="pass-9" />
+              <span>综合练习能独立跑通，并能向别人讲清每一段在干什么</span>
+            </label>
+          </div>
+          <p class="panel-actions">
+            <button type="button" class="btn-text" data-reset-group="pass-python">清空过关勾选</button>
+          </p>
+          <p>缺哪条就回到对应小节重做「动手」。全部勾完，再进入下一章「数据与计算（NumPy）」。</p>
+        </section>
+
+        <section id="ch-ai" class="chapter-block reveal">
+          <h2>用 AI 学这一章（零基础专用规矩）</h2>
+          <p>可以问 AI（ChatGPT、Cursor、Codex 等），但目标是<strong>你自己会跑、会改</strong>，不是「有一段能交的代码」。Cursor 与 Codex 都是「在写代码的环境里问 AI」，提问规矩相同。</p>
+          <ol>
+            <li>一次只问一个问题（例如「为什么报 NameError」）。</li>
+            <li>先自己根据行号改一版，再让 AI 看。</li>
+            <li>禁止：把整章综合练习直接丢给 AI 生成后交差。</li>
+            <li>AI 给的每一行，你要能说清作用；说不清就删掉重写。</li>
+          </ol>
+          <pre><code>我是零基础本科生，在学 Python。
+环境：Windows，Python 版本是 ____，编辑器是 VS Code / Cursor / Codex（选填）。
+请不要直接给完整作业答案。
+我的目标是理解，请用初中生能懂的话解释。
+
+我的代码：
+（粘贴）
+
+完整报错：
+（粘贴）
+
+请：1）指出最可能的一处错误；2）只建议修改哪几行；3）给我一个最小的对照例子。</code></pre>
+        </section>
+
+        <nav class="chapter-pager" aria-label="章节翻页">
+          <a class="pager-link" href="index.html#learn">← 返回学习清单</a>
+          <a class="pager-link" href="data-computing.html">下一章：数据与计算 →</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <p><span class="brand-inline">深基课</span> · Python 底子（零基础细讲）</p>
+      <p class="muted"><a href="index.html">回到首页</a></p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

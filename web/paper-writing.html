@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>顶会论文写作教程 · 深基课</title>
+  <meta name="description" content="可照着写的 CCF A/B 写作细讲：填空清单、英文句式、正反例、实验四段写法、空话表、Cursor 提示词；附 TeX/Bib。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .fill-table { width:100%; border-collapse:collapse; font-size:0.95rem; margin:0.75rem 0 1.25rem; }
+    .fill-table th, .fill-table td { border:1px solid rgba(0,0,0,.12); padding:0.55rem 0.7rem; vertical-align:top; text-align:left; }
+    .fill-table th { background:rgba(0,0,0,.04); font-weight:600; width:28%; }
+    .pair { display:grid; gap:0.75rem; margin:0.9rem 0 1.2rem; }
+    @media (min-width:820px){ .pair { grid-template-columns:1fr 1fr; } }
+    .pair .bad, .pair .good { border-radius:10px; padding:0.85rem 1rem; font-size:0.92rem; line-height:1.55; }
+    .pair .bad { background:#fff4f2; border:1px solid #f0c2bb; }
+    .pair .good { background:#f2f8f3; border:1px solid #b9d8c0; }
+    .pair .lab { display:block; font-weight:700; font-size:0.8rem; letter-spacing:.04em; margin-bottom:0.35rem; text-transform:uppercase; }
+    .pair .bad .lab { color:#9b2c2c; }
+    .pair .good .lab { color:#276749; }
+    .sent { background:rgba(0,0,0,.03); border-left:3px solid rgba(0,0,0,.25); padding:0.7rem 0.9rem; margin:0.6rem 0; font-family:ui-monospace,Consolas,monospace; font-size:0.86rem; white-space:pre-wrap; }
+    .mini-check { margin:0.4rem 0 0.9rem; padding-left:1.1rem; }
+    .mini-check li { margin:0.25rem 0; }
+  </style>
+</head>
+<body class="page-chapter">
+  <a class="skip" href="#chapter-main">跳到正文</a>
+
+  <header class="top">
+    <a class="brand-mark" href="index.html">深基课</a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="index.html#learn">学习清单</a>
+      <a href="#toc">本章目录</a>
+      <a href="#ch-files">TeX 文件</a>
+    </nav>
+  </header>
+
+  <main id="chapter-main">
+    <header class="chapter-hero">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">深基课</a> / 论文写作</p>
+        <p class="section-kicker">第八章 · 08 · CCF A/B 写作细讲</p>
+        <h1>顶会论文写作教程</h1>
+        <p class="chapter-lead">这章是<strong>教你怎么写</strong>，不是空讲「要有贡献、要有创新」。每一节都给你：写之前填什么、英文句式怎么套、差句/好句对照、写完自检。示例方法名用模板里的 <strong>DPCNet</strong>（Dual-Path Calibration Network）；你写自己的稿时，把任务、模块名、数字全部换成自己的。</p>
+        <p class="chapter-goal"><strong>目标：</strong>能对着本页，用 Cursor 按节写出可编译英文 LaTeX，并把表格里的真实实验数字填进去。</p>
+      </div>
+    </header>
+
+    <div class="chapter-layout wrap">
+      <nav class="toc" id="toc" aria-label="章节目录">
+        <p class="toc-title">本章目录</p>
+        <ol>
+          <li><a href="#ch-prep">写之前先填这张表</a></li>
+          <li><a href="#ch-0">全文结构与边界</a></li>
+          <li><a href="#ch-abs">摘要 Abstract</a></li>
+          <li><a href="#ch-intro">引言 Introduction</a></li>
+          <li><a href="#ch-rw">相关工作 Related Work</a></li>
+          <li><a href="#ch-method">方法 Method</a></li>
+          <li><a href="#ch-exp">实验 Experiments</a></li>
+          <li><a href="#ch-concl">结论 Conclusion</a></li>
+          <li><a href="#ch-empty">空话与禁用写法</a></li>
+          <li><a href="#ch-bib">参考文献</a></li>
+          <li><a href="#ch-cursor">用 Cursor 写论文</a></li>
+          <li><a href="#ch-order">推荐写作顺序</a></li>
+          <li><a href="#ch-files">TeX / Bib 文件</a></li>
+          <li><a href="#ch-pass">过关自检</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+
+        <section id="ch-prep" class="chapter-block reveal">
+          <h2>0. 写之前先填这张表（不填就开写，一定空）</h2>
+          <p>打开记事本或 Markdown，把下面每一格写成<strong>具体名词</strong>，不要写「提升性能」「更好建模」。写摘要、引言、方法时，只允许用这张表里的词。</p>
+          <table class="fill-table">
+            <tr><th>要填的项</th><th>怎么填（示例用 DPCNet）</th></tr>
+            <tr><td>任务一句话</td><td>视觉识别：输入 RGB 图，输出类别（如 CIFAR-100 / ImageNet 协议）</td></tr>
+            <tr><td>方法全称 + 缩写</td><td>Dual-Path Calibration Network（DPCNet）——全文只用这一套</td></tr>
+            <tr><td>一个核心缺口</td><td>现有管线常只强化局部或全局之一，缺少显式双路径校准</td></tr>
+            <tr><td>挑战 1（建模难点）</td><td>局部证据选择不可靠：纹理噪声/伪相关被放大</td></tr>
+            <tr><td>挑战 2（与 1 独立）</td><td>跨区域一致性弱：全局聚合混入冲突语义</td></tr>
+            <tr><td>模块 1 本名（对挑战1）</td><td>Local Evidence Refinement（LER）——禁止写 Innovation A</td></tr>
+            <tr><td>模块 2 本名（对挑战2）</td><td>Global Consistency Calibration（GCC）</td></tr>
+            <tr><td>数据集与划分</td><td>数据集名、类别数、train/val、评估协议是否与 baseline 一致</td></tr>
+            <tr><td>主指标 + 次指标</td><td>Top-1；约定 Top-5 / Params / FLOPs 是否计入「全面超」</td></tr>
+            <tr><td>Baseline 名字</td><td>与代码 <code>method=baseline</code> 完全一致的那条结果</td></tr>
+            <tr><td>对照方法（建议 ≥8）</td><td>ResNet、SE、CBAM、ViT、DeiT、Swin、ConvNeXt…（同协议复现）</td></tr>
+            <tr><td>你已跑通的数字</td><td>贴表：方法 | 主指标 | 备注；没有数字就先别写 Experiments</td></tr>
+            <tr><td>消融变式名</td><td>w/o LER、w/o GCC、w/o fusion——用模块本名</td></tr>
+          </table>
+          <div class="callout callout-warn">
+            <p><strong>铁律：</strong>正文永远写模块本名。辅导流程里的 A/B 只在第七章对话用，不进论文、不进图表标题。</p>
+          </div>
+        </section>
+
+        <section id="ch-0" class="chapter-block reveal">
+          <h2>1. 全文结构与边界</h2>
+          <p>七大块各管一块事。写错边界会出现「引言报点」「方法贴表」这类硬伤。</p>
+          <table class="fill-table">
+            <tr><th>章节</th><th>这一节要完成的事</th><th>绝对不要写</th></tr>
+            <tr><td>Abstract</td><td>独立可读的 150–250 词故事</td><td>引用、公式、「见图 x」、夸张词</td></tr>
+            <tr><td>Introduction</td><td>缺口 → 两挑战 → 方案对应 → 可证伪贡献</td><td>公式、实验数字、模块内部细节</td></tr>
+            <tr><td>Related Work</td><td>两子节评前人 + 收束引出本文</td><td>完整讲自己的网络结构</td></tr>
+            <tr><td>Method</td><td>符号、公式、算法、复杂度</td><td>对比表、准确率、可视化结果</td></tr>
+            <tr><td>Experiments</td><td>设置→主对比→消融→参数→可视化→错误</td><td>新提未在方法里定义的模块</td></tr>
+            <tr><td>Conclusion</td><td>总结 / 局限 / 未来（一一对应）</td><td>新文献、新公式、新实验数字</td></tr>
+            <tr><td>References</td><td>35+ 可核验真实文献</td><td>虚构作者/年份/会议</td></tr>
+          </table>
+          <p><strong>推荐写作顺序（和阅读顺序不同）：</strong>先锁上表 → Method 骨架 → Introduction → Related Work → Experiments（有表再写）→ Abstract → Conclusion。</p>
+        </section>
+
+        <section id="ch-abs" class="chapter-block reveal">
+          <h2>2. 摘要 Abstract（最后写，但先学会链）</h2>
+          <p><strong>是什么：</strong>审稿人最先读的 150–250 词完整故事。它是引言的凝练，但<strong>禁止整句复制</strong>引言。</p>
+          <p><strong>六句叙事链（按这个顺序写英文）：</strong></p>
+          <ol>
+            <li>任务价值（领域里为什么还值得做）</li>
+            <li>核心缺口（一句话，和你表里「一个核心缺口」一致）</li>
+            <li>本文方法：首次写出全称 + 缩写</li>
+            <li>机制一句话（点两个模块在干什么，不展开公式）</li>
+            <li>实验优势概括（可写「优于强 CNN / Transformer / hybrid baselines」；具体数字可放正文表）</li>
+            <li>意义 / 适用范围收一句</li>
+          </ol>
+          <p><strong>可套句式（把括号换成你的词）：</strong></p>
+          <div class="sent">[Task] remains challenging when [concrete failure mode].
+Existing [CNN / Transformer / hybrid] pipelines often [single-route behavior], leaving a gap in [your core gap].
+We present the [Full Name] ([ABBR]), which [module1] and [module2] under a unified objective.
+The design targets [challenge1] and [challenge2].
+Experiments on [datasets] show consistent gains over [baseline families], supported by ablations and visualizations.</div>
+          <div class="pair">
+            <div class="bad"><span class="lab">差（空）</span>We propose a novel and powerful network that greatly improves performance and can be widely applied.</div>
+            <div class="good"><span class="lab">好（具体）</span>We present DPCNet, which couples Local Evidence Refinement with Global Consistency Calibration to stabilize local cues and cross-region semantics under one training objective.</div>
+          </div>
+          <p><strong>硬约束：</strong>无 <code>\cite</code>、无公式、无「见图 x」；禁用 groundbreaking / unprecedented / empower / significantly empower 等夸张词。</p>
+          <ul class="mini-check">
+            <li>□ 首次出现写了全称+缩写，且与引言、方法一致</li>
+            <li>□ 能指着摘要说出「缺口是哪一句、两模块各对哪挑战」</li>
+            <li>□ 没有从引言复制整句</li>
+          </ul>
+        </section>
+
+        <section id="ch-intro" class="chapter-block reveal">
+          <h2>3. 引言 Introduction（四段论 + 贡献）</h2>
+          <p><strong>是什么：</strong>让审稿人相信「问题真、缺口准、方案对症」。纯段落，不列 bullet；批判要落到<strong>建模机制</strong>，不要只说「效果不好」。</p>
+
+          <h3>3.1 第一段 · 任务背景（有引用，不给方案）</h3>
+          <p>写：领域是什么 → 应用/科研价值 → 权威文献撑趋势 → 点到痛点（仍是背景层）。</p>
+          <div class="sent">[Domain] has become a foundational capability for [apps]~\cite{key1,key2}.
+With [trend], accuracy on [benchmarks] has improved, and backbones are routinely transferred to [downstream]~\cite{key3}.
+Despite this progress, systems still fail when [concrete failure: occlusion / clutter / domain shift].
+These errors matter because [downstream consequence].</div>
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>Deep learning is developing rapidly and has been applied in many fields, which is of great significance.</div>
+            <div class="good"><span class="lab">好</span>Deep visual recognition underpins retrieval and perception pipelines~\cite{deng2009imagenet,he2016resnet}, yet decisions remain brittle under occlusion and conflicting long-range context.</div>
+          </div>
+
+          <h3>3.2 第二段 · 现有方法 → 收敛到同一个核心缺口</h3>
+          <p>按「传统 → 改进 → 当代主流」递进。每一类：<strong>一句优点 + 一句机制缺陷</strong>。全部缺陷必须收敛到你表里的<strong>同一个核心缺口</strong>，不要列三个互不相关的槽点。</p>
+          <div class="sent">Classical CNNs provide strong local inductive biases~\cite{...}, yet their receptive-field growth is primarily hierarchical.
+Vision Transformers model long-range dependencies~\cite{...}, but global mixing can dilute locally decisive evidence.
+Hybrid designs narrow the gap~\cite{...}; nevertheless, many pipelines still optimize a single dominant route.
+The core modeling limitation is therefore [ONE gap sentence].</div>
+          <p>段末可接动机图（可选）：</p>
+          <div class="sent">The core modeling limitation of existing methods is illustrated in Figure~\ref{fig:motivation_example}.</div>
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>CNNs are not good enough. Transformers also have problems. There is still room for improvement.</div>
+            <div class="good"><span class="lab">好</span>Many pipelines optimize either local operators or global attention alone; the missing piece is an explicit dual-path calibration mechanism under one objective.</div>
+          </div>
+
+          <h3>3.3 第三段 · 两大挑战（必须相互独立）</h3>
+          <p>从「一个缺口」拆出两个挑战。每个挑战写清：难点本质 → 建模瓶颈 → 现有方法为何不够。禁止把两挑战写成同一句话的两半（例如「既要准又要稳」）。</p>
+          <div class="sent">This limitation raises two coupled scientific challenges.
+First, [challenge1 name]: [mechanism] so that [bad consequence]~\cite{optional}.
+Second, [challenge2 name]: [mechanism] so that [bad consequence]~\cite{optional}.
+Existing single-route designs typically mitigate one challenge more than the other.</div>
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>Challenge 1 is improving accuracy. Challenge 2 is improving robustness.</div>
+            <div class="good"><span class="lab">好</span>Challenge 1 is unreliable local evidence selection (spurious textures amplified). Challenge 2 is weak cross-region consistency (incompatible semantics mixed by global aggregation).</div>
+          </div>
+
+          <h3>3.4 第四段 · 提出方法（模块 ↔ 挑战一一对应）</h3>
+          <p>写出全称+缩写；简述构成；明确「模块1对挑战1、模块2对挑战2」。仍不写公式、不报准确率。</p>
+          <div class="sent">To address both challenges, we propose the [Full Name] (\textbf{[ABBR]}).
+[ABBR] maintains a [module1] path for Challenge~1 and a [module2] path for Challenge~2, then fuses the calibrated streams.
+The joint objective encourages complementary rather than redundant corrections.</div>
+
+          <h3>3.5 贡献段（可证伪，不是口号）</h3>
+          <p>连贯段落，可用 (i)(ii)(iii)。每条都能被后文实验证伪。不要写 “The main contributions are as follows:” 再接中文式项目符号列表。</p>
+          <div class="sent">Our contributions are threefold.
+(i)~We formulate failures around a single gap---[gap]---and derive two explicit challenges on [c1] and [c2].
+(ii)~We instantiate [ABBR] with [module1] and [module2], consistent notation, and a complete training procedure.
+(iii)~We validate the design with comparisons, ablations, sensitivity, visualization, and error analysis under a fixed protocol.</div>
+          <ul class="mini-check">
+            <li>□ 缺口只有「一个」，两挑战从它拆出且互不重复</li>
+            <li>□ 模块本名与挑战一一对应；无 Innovation A/B</li>
+            <li>□ 无公式、无 Top-1 数字</li>
+          </ul>
+        </section>
+
+        <section id="ch-rw" class="chapter-block reveal">
+          <h2>4. 相关工作 Related Work</h2>
+          <p><strong>是什么：</strong>定位你与前人的差异，不是文献清单。只评前人，不在这里完整介绍自己的网络。</p>
+          <p><strong>结构：</strong>两个子标题，逻辑互不重叠。常用切法：</p>
+          <ul>
+            <li>任务线 / 技术线（例如「局部卷积与注意力」vs「Transformer 与混合全局建模」）</li>
+            <li>或 CNN 路线 / Transformer 路线</li>
+          </ul>
+          <p><strong>每一篇代表作的固定写法（背下来）：</strong></p>
+          <div class="sent">XXX et al.~\cite{key} propose [core idea] for [task setting].
+Their design [task adaptation + underlying operator].
+It is effective at [strength], yet [mechanism limitation — not “accuracy is low”].</div>
+          <p>代表作细评 2–4 篇；同类其余合并引用，例如 <code>\cite{a,b,c}</code>。禁止按年份流水账。</p>
+          <p><strong>两节结束后的收束段（必须有）：</strong></p>
+          <div class="sent">Across both lines, existing methods still [shared shortboard tied to your ONE gap].
+This leaves a research blank in [gap restated].
+In contrast, [ABBR] keeps an explicit [dual-path / your idea] rather than replacing one backbone family with another.</div>
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>Many methods have been proposed in recent years. Our method is different and better.</div>
+            <div class="good"><span class="lab">好</span>CNNs remain strong at neighborhood structure but lack explicit consistency correction; Transformers excel at long-range mixing yet can over-smooth local cues. DPCNet targets joint calibration instead of swapping backbone families.</div>
+          </div>
+          <ul class="mini-check">
+            <li>□ 两个子标题互不重叠</li>
+            <li>□ 代表作都有「优点 + 机制局限」</li>
+            <li>□ 收束段引出本文动机，但未展开公式</li>
+          </ul>
+        </section>
+
+        <section id="ch-method" class="chapter-block reveal">
+          <h2>5. 方法 Method（可复现的符号化说明）</h2>
+          <p><strong>是什么：</strong>别人照着符号和算法能复现你的训练流程。缩写必须与摘要、引言完全一致。</p>
+
+          <h3>5.1 Problem Formulation</h3>
+          <p>先定义输入输出与符号，再给优化目标。符号首次出现立刻释义。</p>
+          <div class="sent">Let an input image be $\mathbf{X}\in\mathbb{R}^{H\times W\times C}$ with label $y\in\{1,\ldots,K\}$.
+A backbone $f_{\theta}$ maps $\mathbf{X}$ to $\mathbf{F}\in\mathbb{R}^{h\times w\times d}$:
+\begin{equation}
+\mathbf{F}=f_{\theta}(\mathbf{X}).
+\label{eq:backbone}
+\end{equation}
+Our goal is to learn ... minimizing
+\begin{equation}
+\min_{\theta,\phi,\psi}\;\mathbb{E}[\mathcal{L}_{\mathrm{cls}}(\cdot)+\lambda\mathcal{L}_{\mathrm{cal}}(\cdot)].
+\label{eq:obj}
+\end{equation}</div>
+          <p><strong>公式行文规矩：</strong>公式前有引导句；公式后用 “where …” 解释符号；每个关键式都有 <code>\label{eq:...}</code>；全文同一符号不换含义。</p>
+
+          <h3>5.2 Model Overview</h3>
+          <p>自上而下：数据流 → 创新模块 vs 标准组件 → 回扣两大挑战。段末可接架构图：</p>
+          <div class="sent">The overall architecture of the proposed framework is illustrated in Figure~\ref{fig:model_arch}.</div>
+          <p>图内模块名必须用本名（LER / GCC），禁止 Innovation A/B；图上不要写方法名大横幅（标题留给 caption）。</p>
+
+          <h3>5.3 各模块（先机理，再公式）</h3>
+          <p>每个创新模块至少：</p>
+          <ol>
+            <li>一段话：解决哪个挑战、输入输出是什么</li>
+            <li>≥2 条带 label 的公式（中间量 → 输出）</li>
+            <li>符号即时解释；说明如何接到下一模块</li>
+          </ol>
+          <div class="sent">Given $\mathbf{F}$, we compute a local importance map $\mathbf{A}_{\ell}$ and a refined field $\mathbf{F}_{\ell}$:
+\begin{equation}
+\mathbf{A}_{\ell}=\sigma\big(\mathrm{Conv}_{1\times1}(\mathbf{F})\big),
+\label{eq:local_attn}
+\end{equation}
+where $\sigma$ denotes a sigmoid. We then obtain
+\begin{equation}
+\mathbf{F}_{\ell}=\mathbf{A}_{\ell}\odot\mathbf{F},
+\label{eq:local_refine}
+\end{equation}
+which addresses Challenge~1 by reweighting local responses before global calibration.</div>
+          <p>模板要求 Method 里 numbered 公式尽量 ≥10；不要用一条残差通式敷衍两个模块。</p>
+
+          <h3>5.4 Training procedure</h3>
+          <p>用 Algorithm 环境写清：输入、输出、前向、损失、更新、停止条件；<code>\label{alg:train}</code>。补充优化器、epoch、学习率调度等可复现设定（细节也可在实验设置重复）。</p>
+
+          <h3>5.5 Complexity</h3>
+          <p>分别写训练阶段与推理阶段的时间复杂度，以及空间复杂度；指出受哪些超参影响；相对 baseline 理论比较一句即可。</p>
+          <div class="callout callout-warn">
+            <p>Method 节<strong>禁止</strong>出现 Top-1、对比表、「优于某某方法 xx%」。那些全部放到 Experiments。</p>
+          </div>
+          <ul class="mini-check">
+            <li>□ 每个创新模块 ≥2 条带 label 公式</li>
+            <li>□ 有 Algorithm + Complexity</li>
+            <li>□ 无实验数字</li>
+          </ul>
+        </section>
+
+        <section id="ch-exp" class="chapter-block reveal">
+          <h2>6. 实验 Experiments（顶会结构，数字必须真实）</h2>
+          <p>没有对照表就不要开始写这一节。所有数字来自你自己跑的日志；模板里的 <code>[TOP1]</code> 之类必须替换。</p>
+
+          <h3>6.1 Setup 实验设置（按这个顺序写）</h3>
+          <ol>
+            <li><strong>数据集：</strong>名称、规模、类别数、划分、为何用它（一句话）</li>
+            <li><strong>对比方法：</strong>每个方法一句建模特点（不是只列名字）</li>
+            <li><strong>评价指标：</strong>主指标、次指标、越高/越低越好</li>
+            <li><strong>实现细节：</strong>优化器、学习率、batch、epoch、种子、硬件、数据增强</li>
+          </ol>
+          <div class="sent">We evaluate on [dataset] with [split].
+Competitors include [M1] ([one-line mechanism]), [M2] (...), ...
+We report [metric].
+All methods are trained under the same protocol: [optimizer], [epochs], [seed], on [GPU].</div>
+
+          <h3>6.2 Performance Comparison（主对比四段写法——照着填）</h3>
+          <p>正文对应一张主表。下面四段每段建议：<strong>8–15 词标题句 + 60–80 词展开</strong>（页限紧可略缩，但结构不能丢）。</p>
+
+          <p><strong>第 1 段 · 总述最优</strong></p>
+          <div class="sent">[ABBR] achieves the best overall [metric] on [dataset].
+It reaches [YOUR_NUM], outperforming the strongest baseline [NAME] ([BASE_NUM]) by [DELTA].
+The gain is consistent with dual-path calibration: [one mechanism reason tied to challenges], rather than a larger backbone alone.</div>
+
+          <p><strong>第 2 段 · 基线类别对比 1</strong>（例如强 CNN / 带注意力 CNN 优于轻量 CNN）</p>
+          <div class="sent">Among convolutional baselines, [StrongCNN] outperforms [LightCNN] ([a] vs [b]).
+This gap suggests that [mechanism: capacity / attention reweighting] matters when [dataset property].
+However, even [StrongCNN] still trails [ABBR], indicating that local reweighting alone does not solve [challenge2].</div>
+
+          <p><strong>第 3 段 · 基线类别对比 2</strong>（例如 Transformer / hybrid 与 CNN 家族）</p>
+          <div class="sent">Transformer-style models such as [ViT/Swin] improve long-range modeling over classical CNNs ([c] vs [d]),
+yet can underperform [ABBR] when local cues are decisive.
+This pattern aligns with Challenge~1: global mixing without local refinement may dilute discriminative evidence.</div>
+
+          <p><strong>第 4 段 · 总体机制收束</strong></p>
+          <div class="sent">Overall, [ABBR] improves over convolutional, attention-augmented, and transformer baselines under the same protocol.
+Quantitative gaps are largest against [weakest_family] and remain positive against [strongest_baseline].
+These results support that addressing both [c1] and [c2] jointly is more effective than strengthening a single representation route.</div>
+
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>As shown in Table 1, our method is the best. It can be seen that the proposed method has obvious advantages.</div>
+            <div class="good"><span class="lab">好</span>DPCNet reaches 82.1% Top-1, exceeding ConvNeXt-T (80.4%) by 1.7 points; the margin over SE-ResNet suggests local attention alone leaves cross-region conflicts unresolved.</div>
+          </div>
+          <p class="muted">上例数字是<strong>教学假想格式</strong>；你必须换成自己表里的真实数，没有就先空着别编。</p>
+
+          <h3>6.3 Ablation 消融</h3>
+          <p>先写清「做了什么、为了验证什么、每个变式去掉什么」，再分析数字。</p>
+          <div class="sent">We ablate [ABBR] by removing [LER] (w/o LER), removing [GCC] (w/o GCC), and removing the fusion term (w/o fusion).
+w/o LER drops to [n1], showing Challenge~1 is not covered by the global path alone.
+w/o GCC drops to [n2], showing Challenge~2 remains when only local refinement is kept.
+The full model recovers [n_full], indicating the two paths are complementary.</div>
+          <p>消融名用模块本名；不要写 w/o A、w/o Innovation B。</p>
+
+          <h3>6.4 Parameter Analysis</h3>
+          <p>选 1–2 个关键超参（如损失权重 <code>λ</code>、融合维度、窗口大小）。写法：参数含义 → 扫描范围 → 趋势 → 选用默认值的理由 → 与挑战的关系。</p>
+          <div class="sent">We vary $\lambda\in\{0.1,0.5,1.0,2.0\}$.
+Performance peaks at $\lambda=[best]$ and degrades when $\lambda$ is too small (under-regularized consistency) or too large (classification signal dominated).
+We therefore set $\lambda=[best]$ in all main experiments.</div>
+
+          <h3>6.5 Visualization</h3>
+          <p>自然段落，不要只丢图不解释：</p>
+          <ol>
+            <li>为了验证什么（对应哪一挑战）</li>
+            <li>做了什么可视化、怎么做（Grad-CAM / t-SNE / 注意力图）</li>
+            <li>结果看到什么现象</li>
+            <li>结论与依据（同种子、同图对比等）</li>
+          </ol>
+          <div class="sent">To examine whether LER focuses on decisive local evidence, we visualize Grad-CAM maps for baseline and [ABBR] on the same images and seed.
+[ABBR] concentrates on [object parts], whereas the baseline activates [background / spurious regions], supporting Challenge~1.</div>
+
+          <h3>6.6 Case / Error Analysis</h3>
+          <p>至少各举一类：成功案例（为什么成功，挂到模块）+ 失败模式（什么假设被打破、适用边界）。</p>
+          <div class="sent">Success cases often involve [clutter with clear local parts], where LER preserves cues while GCC suppresses conflicting regions.
+Failure cases remain under [extreme occlusion / tiny objects / severe domain shift], where both local evidence and global context are insufficient—an intrinsic limit of the current calibration assumption.</div>
+          <ul class="mini-check">
+            <li>□ Setup 含数据/对照/指标/实现细节</li>
+            <li>□ 主对比按「最优 + 两类基线对比 + 机制收束」四段写</li>
+            <li>□ 消融用模块本名；有参数、可视化、错误分析</li>
+            <li>□ 所有数字来自自己的表，无编造</li>
+          </ul>
+        </section>
+
+        <section id="ch-concl" class="chapter-block reveal">
+          <h2>7. 结论 Conclusion（三块递进）</h2>
+          <p>不要照搬摘要。三块各自成段；Future Work 必须和 Limitations <strong>一一对应</strong>。</p>
+
+          <h3>7.1 Summary</h3>
+          <div class="sent">We presented [ABBR] for [task], motivated by a single gap in [gap].
+The framework instantiates [module1] and [module2] to address [c1] and [c2].
+Under a unified protocol, comparisons and ablations support that joint calibration improves over single-route baselines.</div>
+
+          <h3>7.2 Limitations（写建模假设，不写「显卡不够」）</h3>
+          <div class="pair">
+            <div class="bad"><span class="lab">差</span>Our method needs more GPUs and larger datasets. Time was limited.</div>
+            <div class="good"><span class="lab">好</span>DPCNet assumes that local evidence and global consistency can be calibrated from the same supervised labels; under extreme occlusion where neither cue is reliable, the calibration objective provides limited additional signal.</div>
+          </div>
+          <div class="sent">First, [assumption1] may break when [condition].
+Second, [assumption2] increases [cost/complexity] and may be redundant for [easy cases].</div>
+
+          <h3>7.3 Future Work（逐条对应局限）</h3>
+          <div class="sent">To address the first limitation, we plan to [concrete modeling fix: e.g., uncertainty-aware gating / multi-view consistency].
+To address the second, we will study [lighter fusion / adaptive λ / task transfer to detection].</div>
+          <p>禁止空泛愿景：「探索更多场景」「结合大模型赋能」——除非你能写出具体机制改动。</p>
+          <ul class="mini-check">
+            <li>□ Summary 回扣开篇挑战，形成闭环</li>
+            <li>□ 局限在机制/假设层</li>
+            <li>□ 未来工作与局限条数对应、可落地</li>
+            <li>□ 无新文献、新公式、新实验数字</li>
+          </ul>
+        </section>
+
+        <section id="ch-empty" class="chapter-block reveal">
+          <h2>8. 空话与禁用写法（改稿时对照删）</h2>
+          <table class="fill-table">
+            <tr><th>空话 / 禁用</th><th>问题</th><th>改成什么</th></tr>
+            <tr><td>novel / powerful / significantly improve（无数字）</td><td>无法证伪</td><td>写出相对谁、指标、差值</td></tr>
+            <tr><td>as we all know / in recent years… rapidly</td><td>套话开场</td><td>直接写任务 + 文献</td></tr>
+            <tr><td>existing methods have limitations</td><td>没说机制</td><td>指出缺哪类算子/假设</td></tr>
+            <tr><td>Innovation A / Module B</td><td>辅导代号进正文</td><td>模块本名 LER / GCC</td></tr>
+            <tr><td>groundbreaking / unprecedented / empower</td><td>夸张</td><td>删掉，改事实陈述</td></tr>
+            <tr><td>It can be seen that / Obviously</td><td>翻译腔</td><td>直接给判断 + 数字</td></tr>
+            <tr><td>引言里报 Top-1</td><td>越界</td><td>数字只放 Experiments</td></tr>
+            <tr><td>方法节贴对比表</td><td>越界</td><td>表只放 Experiments</td></tr>
+            <tr><td>结论写「数据太少」当唯一局限</td><td>推脱</td><td>写建模假设边界</td></tr>
+            <tr><td>编造未读过的引用</td><td>学术不端风险</td><td>Scholar 核到再 cite</td></tr>
+          </table>
+        </section>
+
+        <section id="ch-bib" class="chapter-block reveal">
+          <h2>9. 参考文献</h2>
+          <ul>
+            <li>全部进 <code>refs.bib</code>，正文只用 <code>\cite{key}</code></li>
+            <li>目标 <strong>35+</strong>；优先近年顶会/期刊；每条用完整标题在 Scholar 核能到</li>
+            <li>禁止虚构作者、年份、会议；预印本与正式发表勿重复混用</li>
+            <li>教程自带 <code>writing/refs.bib</code> 学格式；正式投稿再核 DOI/页码</li>
+            <li>Cursor 若补文献：只让它列「标题 + 检索词」，你核实后再写入 bib，禁止让它直接捏造条目</li>
+          </ul>
+        </section>
+
+        <section id="ch-cursor" class="chapter-block reveal">
+          <h2>10. 用 Cursor 按节写作（可直接复制）</h2>
+          <p><strong>总规则：</strong>一次只生成一节；用 <code>@</code> 挂上创新点文档、数字表、<code>refs.bib</code>；生成后你必须人工核对术语与数字。</p>
+
+          <h3>10.1 锁术语（先发这一条）</h3>
+          <pre><code>请阅读 @docs/innovation.md（或我贴的创新点说明）。
+先不要写正文。只输出一张术语表确认：
+- 方法全称与缩写
+- 一个核心缺口（一句话）
+- 挑战1 / 挑战2（机制级，不要“提高精度”）
+- 模块1本名↔挑战1，模块2本名↔挑战2
+- 禁止使用 Innovation A/B 字样
+我确认后，再按节写 LaTeX。</code></pre>
+
+          <h3>10.2 引言</h3>
+          <pre><code>按深基课规范，只生成 Introduction 英文 LaTeX（四段论+贡献段）。
+方法缩写：____
+核心缺口：____
+挑战1：____  挑战2：____
+模块对应：____ ↔ 挑战1；____ ↔ 挑战2
+背景与现有方法必须使用 @writing/refs.bib 已有真实 key，禁止编造文献。
+不要写公式和实验数字。批判写到建模机制。</code></pre>
+
+          <h3>10.3 相关工作</h3>
+          <pre><code>只写 Related Work：两个子节标题 + 正文 + 收束段。
+风格：XXX et al.~\cite{key}；代表作细评，其余合并引用。
+从 @writing/refs.bib 选用真实条目；若不够，只列出需补充的真实论文标题供我核实，不要虚构 BibTeX。
+不要展开本文公式。</code></pre>
+
+          <h3>10.4 方法</h3>
+          <pre><code>写 Method 英文 LaTeX：
+Problem Formulation / Model Overview / 各模块公式（每式 \label）/
+Algorithm 训练表（\label{alg:train}）/ Complexity。
+缩写与符号与引言一致；每个创新模块≥2条公式；numbered 公式尽量≥10。
+禁止出现实验指标与对比表。</code></pre>
+
+          <h3>10.5 实验（必须贴你的表）</h3>
+          <pre><code>按顶会结构写 Experiments。数字只能使用我提供的表格，禁止改数或编造：
+（在此粘贴：主对比表 / 消融表 / 参数扫描）
+小节顺序：Setup → Performance Comparison → Ablation → Parameter → Visualization → Error。
+Performance Comparison 必须按四段：最优总述 / 基线类别对比1 / 基线类别对比2 / 机制收束。
+消融变式名称用模块本名，不要 Innovation A/B。</code></pre>
+
+          <h3>10.6 摘要与结论（最后）</h3>
+          <pre><code>根据已写好的 Introduction 与 Experiments，重写 Abstract（150–250词，无引用无公式）
+以及 Conclusion（Summary / Limitations / Future Work；未来工作与局限一一对应）。
+不要照搬引言原句；不要新文献与新实验。</code></pre>
+
+          <div class="callout">
+            <p>生成后你要做的三件事：① 全文搜索 Innovation / Module A 删掉；② 抽查 5 条 <code>\cite</code> 是否真在 bib；③ 表中每个数字对一下训练日志。</p>
+          </div>
+        </section>
+
+        <section id="ch-order" class="chapter-block reveal">
+          <h2>11. 推荐写作日程（按天拆，避免空想）</h2>
+          <ol>
+            <li><strong>第 0 天：</strong>填完「写之前那张表」；主对比与消融表定稿（数字冻结）</li>
+            <li><strong>第 1 天：</strong>Method 公式与 Algorithm（可先不管文采）</li>
+            <li><strong>第 2 天：</strong>Introduction 四段论 + 贡献；Related Work 两子节</li>
+            <li><strong>第 3 天：</strong>Experiments 全文（严格按表）；补可视化段落</li>
+            <li><strong>第 4 天：</strong>Abstract + Conclusion；通读边界与空话表；编译过 bib</li>
+          </ol>
+          <p>页限不够时优先砍：Related Work 合并引用、Parameter 缩成一段、可视化减一张——<strong>不要砍</strong>挑战↔模块对应和消融。</p>
+        </section>
+
+        <section id="ch-files" class="chapter-block reveal">
+          <h2>12. 本教程附带文件</h2>
+          <ul>
+            <li><a href="writing/main.tex"><code>web/writing/main.tex</code></a> — 英文全文骨架（示例方法 DPCNet）</li>
+            <li><a href="writing/refs.bib"><code>web/writing/refs.bib</code></a> — 40+ 条真实可见文献</li>
+          </ul>
+          <p>编译：</p>
+          <pre><code>cd web/writing
+pdflatex main
+bibtex main
+pdflatex main
+pdflatex main</code></pre>
+          <div class="callout callout-warn">
+            <p>模板中的准确率占位符 <code>[TOP1]</code>、<code>[D1]</code> 等<strong>必须</strong>换成你自己跑出来的数；示例叙事只演示结构，不能直接当投稿内容。</p>
+          </div>
+        </section>
+
+        <section id="ch-pass" class="chapter-block reveal">
+          <h2>过关自检</h2>
+          <div class="progress-bar" data-progress-for="write-pass" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="write-pass">完成 0 / 14 项</p>
+          <div class="check-panel" data-check-group="write-pass">
+            <label class="check-item"><input type="checkbox" data-key="w-1" /><span>写前表已填满（缺口、两挑战、两模块本名、数据集、主表数字）</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-2" /><span>能说出七大板块各自禁止写什么</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-3" /><span>摘要六句链齐全，无引用/公式，不抄引言</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-4" /><span>引言四段论：一个缺口→两独立挑战→模块一一对应</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-5" /><span>贡献三条可被后文证伪；正文无 Innovation A/B</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-6" /><span>相关工作两子节 + et al. 细评 + 收束引出本文</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-7" /><span>方法每模块≥2公式且有 label；含 Algorithm 与 Complexity</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-8" /><span>方法节无任何实验指标</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-9" /><span>实验 Setup 含数据/对照/指标/实现细节</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-10" /><span>主对比按四段写，数字与日志一致</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-11" /><span>消融用模块本名；有参数、可视化、错误分析</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-12" /><span>结论三块，未来工作对应局限；无新实验</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-13" /><span>bib≥35，抽查5条 Scholar 可核</span></label>
+            <label class="check-item"><input type="checkbox" data-key="w-14" /><span>会用 Cursor 按节生成，并自己替换真实数字</span></label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="write-pass">清空</button></p>
+        </section>
+
+        <nav class="chapter-pager" aria-label="章节翻页">
+          <a class="pager-link" href="innovation-pipeline.html">← 上一章：创新点 Cursor 交互</a>
+          <a class="pager-link" href="index.html#learn">回到学习清单 →</a>
+        </nav>
+
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <p><span class="brand-inline">深基课</span> · 顶会论文写作</p>
+      <p class="muted"><a href="index.html">回到首页</a></p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

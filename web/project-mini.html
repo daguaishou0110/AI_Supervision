@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>做一个小项目 · 深基课</title>
+  <meta name="description" content="深基课第五章：用 Fashion-MNIST 跑通图像分类小项目——数据、模型、训练、评估、保存与报告。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-chapter">
+  <a class="skip" href="#chapter-main">跳到正文</a>
+
+  <header class="top">
+    <a class="brand-mark" href="index.html">深基课</a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="index.html#learn">学习清单</a>
+      <a href="#toc">本章目录</a>
+      <a href="#ch-pass">过关标准</a>
+    </nav>
+  </header>
+
+  <main id="chapter-main">
+    <header class="chapter-hero">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">深基课</a> / <a href="index.html#learn">先学什么</a> / 做一个小项目</p>
+        <p class="section-kicker">第五章 · 05 · 小项目实战</p>
+        <h1>做一个小项目</h1>
+        <p class="chapter-lead">把前四章串成一条完整流水线。<strong>主线推荐：Fashion-MNIST 图像分类</strong>（数据好下、CPU 也能跑）。文本分类作为加分路线，文末给选型说明。目标不是刷榜，而是：数据 → 训练 → 评估 → 保存 → 能讲清结果。</p>
+        <p class="chapter-goal"><strong>过关目标：</strong>独立跑通分类训练；测试集准确率明显高于乱猜；保存模型与 loss/acc 曲线；能用自己的话做 3 分钟项目汇报。</p>
+      </div>
+    </header>
+
+    <div class="chapter-layout wrap">
+      <nav class="toc" id="toc" aria-label="章节目录">
+        <p class="toc-title">本章目录</p>
+        <ol>
+          <li><a href="#ch-0">怎么学 · 前置</a></li>
+          <li><a href="#ch-1">选什么项目</a></li>
+          <li><a href="#ch-2">项目流水线</a></li>
+          <li><a href="#ch-3">环境与目录</a></li>
+          <li><a href="#ch-4">认识 Fashion-MNIST</a></li>
+          <li><a href="#ch-5">数据与 DataLoader</a></li>
+          <li><a href="#ch-6">搭建分类模型</a></li>
+          <li><a href="#ch-7">训练与验证</a></li>
+          <li><a href="#ch-8">测试与看错例</a></li>
+          <li><a href="#ch-9">保存产物</a></li>
+          <li><a href="#ch-10">完整代码骨架</a></li>
+          <li><a href="#ch-11">调参小实验</a></li>
+          <li><a href="#ch-12">三分钟汇报模板</a></li>
+          <li><a href="#ch-13">文本分类备选</a></li>
+          <li><a href="#ch-14">常见翻车</a></li>
+          <li><a href="#ch-pass">过关自检</a></li>
+          <li><a href="#ch-ai">用 AI 做项目</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+
+        <section id="ch-0" class="chapter-block reveal">
+          <h2>0. 怎么学 · 前置</h2>
+          <p>请先完成 <a href="pytorch-intro.html">第四章</a>（至少会训练循环与保存 <code>state_dict</code>）。本章会用到 <code>torchvision</code>（装 PyTorch 时通常已带，没有就 <code>pip install torchvision</code>）。</p>
+          <ol>
+            <li>一次只改一类东西：先跑通，再提准确率，再美化代码</li>
+            <li>把实验结果记在 <code>NOTES.md</code>：lr、epoch、最终 test acc</li>
+            <li>AI 可以帮你改报错，但评估数字和结论必须你自己跑出来</li>
+          </ol>
+          <div class="callout">
+            <p><strong>建议时间：</strong>首次跑通 3–6 小时；含调参与汇报准备约 1–2 天。</p>
+          </div>
+        </section>
+
+        <section id="ch-1" class="chapter-block reveal">
+          <h2>1. 选什么项目</h2>
+          <ul>
+            <li><strong>主线（推荐）：</strong>Fashion-MNIST 衣服图像 10 分类。比手写数字稍难一点，但仍适合 CPU。</li>
+            <li><strong>同构替换：</strong>MNIST 数字分类（更简单，适合实在跑不动时降级）。</li>
+            <li><strong>加分路线：</strong>文本情感二分类（见第 13 节）。概念相同，数据管线不同。</li>
+          </ul>
+          <div class="callout">
+            <p>本教程正文按 <strong>Fashion-MNIST + 小型 CNN</strong> 写。你照着做完即算第五章过关。</p>
+          </div>
+        </section>
+
+        <section id="ch-2" class="chapter-block reveal">
+          <h2>2. 项目流水线</h2>
+          <figure class="figure">
+            <img src="assets/project-pipeline.png" alt="小项目流水线：数据到保存模型" width="1600" height="900" loading="lazy" />
+            <figcaption>每一段都能在代码里指出来，才算「跑通项目」而不只是「复制能跑」。</figcaption>
+          </figure>
+          <ol>
+            <li>准备数据（下载、变换、划分 DataLoader）</li>
+            <li>定义模型</li>
+            <li>训练 +（可选）验证，记录 loss/acc</li>
+            <li>在测试集上最终评估</li>
+            <li>保存权重与曲线图，写几句结论</li>
+          </ol>
+        </section>
+
+        <section id="ch-3" class="chapter-block reveal">
+          <h2>3. 环境与目录</h2>
+          <pre><code>D:\shenji-python\ch05\
+  train_fashion.py      # 主脚本
+  NOTES.md              # 实验记录
+  outputs\              # 曲线、模型（运行后生成）</code></pre>
+          <pre><code>cd D:\shenji-python
+.\.venv\Scripts\Activate.ps1
+python -c "import torch, torchvision; print(torch.__version__, torchvision.__version__)"</code></pre>
+          <p>首次运行会自动下载 Fashion-MNIST 到本地缓存目录，需要能访问网络。</p>
+        </section>
+
+        <section id="ch-4" class="chapter-block reveal">
+          <h2>4. 认识 Fashion-MNIST</h2>
+          <ul>
+            <li>灰度图 <code>28×28</code>，10 类：T-shirt、Trouser、Pullover、Dress、Coat、Sandal、Shirt、Sneaker、Bag、Ankle boot</li>
+            <li>训练集 6 万，测试集 1 万（库已分好；我们再从训练集划一点做验证）</li>
+            <li>乱猜准确率约 10%；你的模型应明显高于这个数（入门能到 80%+ 往往不难，视训练轮数与模型而定）</li>
+          </ul>
+          <div class="callout callout-warn">
+            <p><strong>别和 ImageNet 比：</strong>这是教学数据集。目标是流程正确，不是 SOTA。</p>
+          </div>
+        </section>
+
+        <section id="ch-5" class="chapter-block reveal">
+          <h2>5. 数据与 DataLoader</h2>
+          <pre><code>import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
+
+tfm = transforms.Compose([
+    transforms.ToTensor(),                 # [0,1]，shape → (1,28,28)
+    transforms.Normalize((0.5,), (0.5,)), # 简单归一化
+])
+
+train_full = datasets.FashionMNIST(
+    root="./data", train=True, download=True, transform=tfm
+)
+test_set = datasets.FashionMNIST(
+    root="./data", train=False, download=True, transform=tfm
+)
+
+# 从训练集划 10% 做验证
+n_val = len(train_full) // 10
+n_train = len(train_full) - n_val
+train_set, val_set = random_split(
+    train_full, [n_train, n_val],
+    generator=torch.Generator().manual_seed(0),
+)
+
+train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
+val_loader = DataLoader(val_set, batch_size=256, shuffle=False)
+test_loader = DataLoader(test_set, batch_size=256, shuffle=False)</code></pre>
+          <p>取一个 batch 检查 shape：图像应是 <code>(B, 1, 28, 28)</code>，标签 <code>(B,)</code> 的整数类别。</p>
+          <p class="tip"><strong>动手：</strong>打印 <code>len(train_set), len(val_set), len(test_set)</code> 与一个 batch 的 shape。</p>
+        </section>
+
+        <section id="ch-6" class="chapter-block reveal">
+          <h2>6. 搭建分类模型</h2>
+          <p>用一个很小的 CNN（比纯 MLP 更适合图像，但仍然短）：</p>
+          <pre><code>import torch.nn as nn
+
+class SmallCNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 16, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),               # 28→14
+            nn.Conv2d(16, 32, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),               # 14→7
+        )
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(32 * 7 * 7, 128),
+            nn.ReLU(),
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        return self.classifier(x)</code></pre>
+          <div class="callout">
+            <p><strong>分类头：</strong>最后一层输出 10 维 logits（未过 softmax）。配合 <code>CrossEntropyLoss</code> 使用——它内部会处理 log-softmax。</p>
+          </div>
+        </section>
+
+        <section id="ch-7" class="chapter-block reveal">
+          <h2>7. 训练与验证</h2>
+          <pre><code>import torch
+import torch.nn as nn
+from torch.optim import Adam
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = SmallCNN().to(device)
+opt = Adam(model.parameters(), lr=1e-3)
+loss_fn = nn.CrossEntropyLoss()
+
+def run_epoch(loader, train=True):
+    model.train(train)
+    total_loss, correct, n = 0.0, 0, 0
+    ctx = torch.enable_grad() if train else torch.no_grad()
+    with ctx:
+        for xb, yb in loader:
+            xb, yb = xb.to(device), yb.to(device)
+            if train:
+                opt.zero_grad()
+            logits = model(xb)
+            loss = loss_fn(logits, yb)
+            if train:
+                loss.backward()
+                opt.step()
+            total_loss += loss.item() * len(xb)
+            pred = logits.argmax(dim=1)
+            correct += (pred == yb).sum().item()
+            n += len(xb)
+    return total_loss / n, correct / n
+
+history = {"train_loss": [], "val_loss": [], "val_acc": []}
+for epoch in range(5):   # 先 5 轮跑通；有时间再加到 10～15
+    tr_loss, tr_acc = run_epoch(train_loader, train=True)
+    va_loss, va_acc = run_epoch(val_loader, train=False)
+    history["train_loss"].append(tr_loss)
+    history["val_loss"].append(va_loss)
+    history["val_acc"].append(va_acc)
+    print(f"epoch {epoch}: train_loss={tr_loss:.4f} val_acc={va_acc:.3f}")</code></pre>
+          <ul>
+            <li>同时看 <strong>val_acc</strong>：比只看 train loss 更能发现过拟合</li>
+            <li>CPU 上 5 个 epoch 可能要几分钟到十几分钟，属正常</li>
+          </ul>
+        </section>
+
+        <section id="ch-8" class="chapter-block reveal">
+          <h2>8. 测试与看错例</h2>
+          <pre><code>test_loss, test_acc = run_epoch(test_loader, train=False)
+print("TEST acc =", test_acc)</code></pre>
+          <p>再抽几张预测错的图（可选但强烈建议）：</p>
+          <pre><code>import matplotlib.pyplot as plt
+
+model.eval()
+xb, yb = next(iter(test_loader))
+xb, yb = xb.to(device), yb.to(device)
+pred = model(xb).argmax(1)
+wrong = (pred != yb).nonzero(as_tuple=True)[0][:8]
+
+plt.figure(figsize=(10, 3))
+for i, idx in enumerate(wrong):
+    plt.subplot(1, 8, i + 1)
+    plt.imshow(xb[idx].cpu().squeeze(), cmap="gray")
+    plt.title(f"t{yb[idx].item()}/p{pred[idx].item()}")
+    plt.axis("off")
+plt.tight_layout()
+plt.savefig("outputs/wrong_examples.png", dpi=150)</code></pre>
+          <p>看错例能帮你理解：Shirt 和 T-shirt 本来就容易混——这是数据难度，不一定是代码写错。</p>
+        </section>
+
+        <section id="ch-9" class="chapter-block reveal">
+          <h2>9. 保存产物</h2>
+          <pre><code>from pathlib import Path
+Path("outputs").mkdir(exist_ok=True)
+torch.save(model.state_dict(), "outputs/fashion_cnn.pt")
+
+plt.figure()
+plt.plot(history["train_loss"], label="train_loss")
+plt.plot(history["val_loss"], label="val_loss")
+plt.legend(); plt.xlabel("epoch"); plt.grid(True)
+plt.tight_layout()
+plt.savefig("outputs/loss_curve.png", dpi=150)
+
+plt.figure()
+plt.plot(history["val_acc"], label="val_acc")
+plt.legend(); plt.xlabel("epoch"); plt.grid(True)
+plt.tight_layout()
+plt.savefig("outputs/acc_curve.png", dpi=150)</code></pre>
+          <p>交作业 / 给老师看时，至少带齐：<code>fashion_cnn.pt</code>、两张曲线、测试准确率数字、几句 NOTES。</p>
+        </section>
+
+        <section id="ch-10" class="chapter-block reveal">
+          <h2>10. 完整代码骨架怎么组织</h2>
+          <p>建议把上面各段收进一个 <code>train_fashion.py</code>，顺序固定为：</p>
+          <ol>
+            <li>import 与随机种子</li>
+            <li>数据</li>
+            <li>模型 / 优化器 / loss</li>
+            <li>训练循环</li>
+            <li>测试 + 存盘 + 画图</li>
+          </ol>
+          <div class="callout callout-warn">
+            <p>第一次允许「一个文件全部堆一起」。跑通后再考虑拆函数。不要一上来就工程化到跑不动。</p>
+          </div>
+
+          <div class="progress-bar" data-progress-for="proj-core" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="proj-core">完成 0 / 5 步</p>
+          <div class="check-panel" data-check-group="proj-core">
+            <label class="check-item"><input type="checkbox" data-key="pj-1" /><span>数据下载成功，batch shape 正确</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pj-2" /><span>训练至少 5 个 epoch，val_acc 明显高于 0.1</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pj-3" /><span>打印 test_acc，并写入 NOTES.md</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pj-4" /><span>保存模型与 loss/acc 曲线到 outputs/</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pj-5" /><span>（可选加分）导出 wrong_examples.png</span></label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="proj-core">清空核心勾选</button></p>
+        </section>
+
+        <section id="ch-11" class="chapter-block reveal">
+          <h2>11. 调参小实验（至少做 1 组对照）</h2>
+          <p>固定其他条件，只改一项，记两行对比：</p>
+          <ul>
+            <li>学习率 <code>1e-3</code> vs <code>1e-4</code></li>
+            <li>或 epoch <code>5</code> vs <code>12</code></li>
+            <li>或 batch_size <code>64</code> vs <code>256</code></li>
+          </ul>
+          <p>在 NOTES 写：改了什么、test_acc 从多少到多少、曲线有何变化。这比盲目堆层数更有训练价值。</p>
+        </section>
+
+        <section id="ch-12" class="chapter-block reveal">
+          <h2>12. 三分钟汇报模板</h2>
+          <ol>
+            <li><strong>任务：</strong>Fashion-MNIST 10 类图像分类</li>
+            <li><strong>方法：</strong>小型 CNN + CrossEntropy + Adam，数据做了 ToTensor/Normalize，从训练划验证</li>
+            <li><strong>结果：</strong>test_acc = ____；曲线见 outputs；错例主要混在 ____</li>
+            <li><strong>对照实验：</strong>改了 ____，结果 ____</li>
+            <li><strong>不足与下一步：</strong>例如更多 epoch、数据增强、更强模型……</li>
+          </ol>
+          <p class="tip"><strong>口语练习：</strong>不看稿讲一遍；讲不清的那句，回去对着代码再看。</p>
+        </section>
+
+        <section id="ch-13" class="chapter-block reveal">
+          <h2>13. 文本分类备选（加分）</h2>
+          <p>若你更想做文本，思路对照如下（不必与图像线同时做）：</p>
+          <ul>
+            <li>数据：如 IMDb 情感、或课程提供的 CSV（文本 + 0/1 标签）</li>
+            <li>把句子变成数字：词表编号 / 简单 bag-of-words / 用现成 embedding（进阶）</li>
+            <li>模型：<code>Embedding + 平均池化 + Linear</code>，或小型 LSTM/TextCNN</li>
+            <li>loss 仍可用 <code>CrossEntropyLoss</code> 或二分类 BCE</li>
+            <li>评估：准确率 + 若干错误句子案例</li>
+          </ul>
+          <div class="callout">
+            <p>文本线环境与预处理坑更多。基础不稳时<strong>优先完成图像主线</strong>再挑战。</p>
+          </div>
+        </section>
+
+        <section id="ch-14" class="chapter-block reveal">
+          <h2>14. 常见翻车</h2>
+          <ul>
+            <li>下载失败 → 换网络 / 镜像，或手动把数据放到 <code>./data</code></li>
+            <li>准确率一直 ~0.1 → 查标签是否进了 CrossEntropy、模型是否真的在 <code>train()</code>、有没有写反 pred/target</li>
+            <li>loss 变 NaN → 降学习率、查输入是否 Normalize 过头或数据损坏</li>
+            <li>极慢 → 减小打印频率；确认没在每步 <code>savefig</code>；batch 调大一点（内存允许时）</li>
+            <li>只报 train 分、不测 test → 项目不算完成</li>
+          </ul>
+        </section>
+
+        <section id="ch-pass" class="chapter-block reveal">
+          <h2>过关自检</h2>
+          <div class="progress-bar" data-progress-for="proj-pass" aria-hidden="true"><div class="progress-fill"></div></div>
+          <p class="progress-text" data-progress-text-for="proj-pass">完成 0 / 10 项</p>
+          <div class="check-panel" data-check-group="proj-pass">
+            <label class="check-item"><input type="checkbox" data-key="pp-1" /><span>独立选了主线项目（图像推荐）并建好目录</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-2" /><span>DataLoader 与 shape 正确</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-3" /><span>模型 + CrossEntropy + 优化器接好</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-4" /><span>训练与验证循环跑通，有历史曲线</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-5" /><span>测试集评估完成，acc 明显高于乱猜</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-6" /><span>outputs 中有模型与图</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-7" /><span>至少一组调参对照记在 NOTES</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-8" /><span>能按汇报模板讲 3 分钟</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-9" /><span>能指着代码标出数据/模型/训练/评估四段</span></label>
+            <label class="check-item"><input type="checkbox" data-key="pp-10" /><span>知道文本线与图像线的对应关系（即便没做文本）</span></label>
+          </div>
+          <p class="panel-actions"><button type="button" class="btn-text" data-reset-group="proj-pass">清空过关勾选</button></p>
+          <p>五项主线章节至此收束。接下来可回头用 Cursor / Codex 在自己的课题数据上复用同一流水线。</p>
+        </section>
+
+        <section id="ch-ai" class="chapter-block reveal">
+          <h2>用 AI 做项目（Cursor / Codex）</h2>
+          <pre><code>我在做深基课第五章 Fashion-MNIST 小项目。
+环境：Windows，torch ____，cuda=____。
+请不要一次性重写整个项目；按我指定的文件段修改。
+
+当前卡点：____
+相关代码（函数级）：
+（粘贴）
+
+报错或现象：
+（粘贴 / 描述 val_acc、test_acc）
+
+请：1）先判断是数据、模型、训练循环还是评估问题；
+2）给最小补丁；3）告诉我改完后应打印哪些 shape/指标来验收。</code></pre>
+        </section>
+
+        <nav class="chapter-pager" aria-label="章节翻页">
+          <a class="pager-link" href="pytorch-intro.html">← 上一章：深度学习入门</a>
+          <a class="pager-link" href="ai-tools.html">下一章：用 AI 复现代码 →</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <p><span class="brand-inline">深基课</span> · 做一个小项目</p>
+      <p class="muted"><a href="index.html">回到首页</a></p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
