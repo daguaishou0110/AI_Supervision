@@ -16,6 +16,7 @@
   <header class="top">
     <a class="brand-mark" href="#top" aria-label="深基课首页">深基课</a>
     <nav class="nav" aria-label="页面导航">
+      <a href="#about">本站介绍</a>
       <a href="#learn">先学什么</a>
       <a href="#ai">用 AI 写代码</a>
       <a href="#plan">学习节奏</a>
@@ -39,10 +40,51 @@
       </div>
     </section>
 
-    <section class="band intro" aria-labelledby="intro-title">
+    <section class="band intro" id="about" aria-labelledby="about-title">
       <div class="wrap">
-        <h2 id="intro-title">这门课解决什么问题</h2>
-        <p class="measure">很多本科生不是不会努力，而是一下子跳进模型与论文，Python、数据和训练循环还没立住。深基课按「能独立跑通一个小实验」来排内容，数学只讲够用的部分。</p>
+        <p class="section-kicker">网站说明</p>
+        <h2 id="about-title">本站是做什么的</h2>
+        <p class="section-lead measure">这是面向基础偏弱本科生的<strong>深度学习辅导站</strong>：按章节自学、用勾选过关、跟 Cursor 做复现与创新验证，最后按顶会结构写英文论文。不是资料堆，也不是只讲概念的 PPT。</p>
+
+        <ol class="site-guide">
+          <li class="reveal">
+            <span class="site-guide-num" aria-hidden="true">01</span>
+            <div>
+              <h3>八章循序教程</h3>
+              <p>从 Python 安装与语法，到 NumPy、机器学习直觉、PyTorch 训练循环，再到 Fashion-MNIST 小项目。每章有细讲、示例和「过关自检」勾选，浏览器会记住你的勾选进度。</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span class="site-guide-num" aria-hidden="true">02</span>
+            <div>
+              <h3>AI 复现开源仓库</h3>
+              <p>教你怎么把 GitHub 项目拉到本地，用 Cursor / Codex 读 README、装依赖、跑通最小 demo。重点是「一次一事 + 自己验收」，不是让 AI 代写整份作业。</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span class="site-guide-num" aria-hidden="true">03</span>
+            <div>
+              <h3>创新点验证流程</h3>
+              <p>按固定标准走：单点 A、B 分别调参超过 baseline，再做 Full 同时超过两个单点，然后做参数分析、可视化与错误分析。辅导成功标准写死在第七章，不要让 AI 自行改过关条件。</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span class="site-guide-num" aria-hidden="true">04</span>
+            <div>
+              <h3>顶会论文写作模板</h3>
+              <p>按摘要 → 四段论引言 → 相关工作 → 方法 → 实验 → 结论讲解；附英文 <code>main.tex</code> 与真实文献 <code>refs.bib</code>，并给出可复制的 Cursor 按节提示词。</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span class="site-guide-num" aria-hidden="true">05</span>
+            <div>
+              <h3>怎么用这个网页</h3>
+              <p>从上到下点「先学什么」进章节；每章目录可跳转；做完勾选过关项。需要节奏参考时看「学习节奏」。建议：地基五章过完再进 AI 复现与创新点，最后写作。</p>
+            </div>
+          </li>
+        </ol>
+
+        <p class="site-guide-foot measure">解决的核心问题：很多人还没立住 Python、数据和训练循环，就直接跳进模型与论文。本站按「能独立跑通一个小实验」排内容，数学只讲够用的部分。</p>
       </div>
     </section>
 
