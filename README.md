@@ -11,9 +11,18 @@ python web_app.py
 
 浏览器打开 http://127.0.0.1:5093
 
-## Render 部署
+## Render 部署（必须用 Web Service，不要用 Static Site）
 
-- Build: `pip install -r requirements.txt`
-- Start: `gunicorn web_app:app --bind 0.0.0.0:$PORT`
+在 [Render Dashboard](https://dashboard.render.com/) 新建 **Web Service**（不是 Static Site），连接本仓库：
 
-也可使用仓库根目录的 `render.yaml`（Blueprint）。
+| 项 | 值 |
+|---|---|
+| Runtime | Python |
+| Root Directory | （留空） |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `gunicorn web_app:app --bind 0.0.0.0:$PORT` |
+
+若误建成 **Static Site**，根目录没有 `index.html`，全站会返回纯文本 `Not Found`。  
+Static Site 仅在 Publish Directory 设为 `web` 时可用；推荐仍用 Web Service。
+
+部署成功后打开 `/healthz` 应返回 `{"ok": true, ...}`。
